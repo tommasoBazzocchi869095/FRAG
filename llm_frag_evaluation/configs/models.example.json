@@ -1,0 +1,21 @@
+{
+  "llms": [
+    {
+      "name": "llama-3-8b-instruct",
+      "backend": "huggingface",
+      "model_id": "meta-llama/Meta-Llama-3-8B-Instruct"
+    },
+    {
+      "name": "mistral-7b-instruct",
+      "backend": "huggingface",
+      "model_id": "mistralai/Mistral-7B-Instruct-v0.3"
+    },
+    {
+      "name": "api-compatible-model",
+      "backend": "openai_compatible",
+      "model_id": "replace-with-served-model-name",
+      "base_url_env": "OPENAI_BASE_URL",
+      "api_key_env": "OPENAI_API_KEY"
+    }
+  ]
+}

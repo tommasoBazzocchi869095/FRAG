@@ -1,0 +1,14 @@
+{
+  "system": {
+    "medical_qa": "You are a careful medical question answering assistant. Choose the single best answer when options are provided. Return only valid JSON."
+  },
+  "zero_shot": {
+    "user": "{question}"
+  },
+  "standard_rag": {
+    "user": "Here are the relevant documents:\n{context}\n\n{question}"
+  },
+  "frag": {
+    "user": "Here are the relevant documents:\n{context}\n\n{question}"
+  }
+}

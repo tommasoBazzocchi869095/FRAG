@@ -1,0 +1,28 @@
+{
+  "id": "sample_001",
+  "dataset": "sample",
+  "question": "A lesion causing compression of the facial nerve at the stylomastoid foramen will cause ipsilateral",
+  "options": {
+    "A": "paralysis of the facial muscles.",
+    "B": "paralysis of the facial muscles and loss of taste.",
+    "C": "paralysis of the facial muscles, loss of taste and lacrimation.",
+    "D": "paralysis of the facial muscles, loss of taste, lacrimation and decreased salivation."
+  },
+  "answer": "A",
+  "passages": [
+    {
+      "id": "sample_passage_001",
+      "title": "Facial nerve anatomy",
+      "content": "The facial nerve exits the skull through the stylomastoid foramen and then supplies the muscles of facial expression.",
+      "score_topic": 18.2,
+      "score_factuality": 0.93
+    },
+    {
+      "id": "sample_passage_002",
+      "title": "Taste fibers",
+      "content": "Taste fibers from the anterior tongue travel through the chorda tympani before joining the facial nerve proximal to the stylomastoid foramen.",
+      "score_topic": 15.1,
+      "score_factuality": 0.88
+    }
+  ]
+}
