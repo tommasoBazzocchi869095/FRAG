@@ -16,6 +16,20 @@ Current filled result:
 - Precision macro: `0.7880424652768914`
 - Recall macro: `0.7788646197680493`
 - F1 macro: `0.781184669047834`
+- PubMedQA / BM25 / zero-shot / Llama-3.1-70B-Instruct
+- `n = 500`
+- `missing_predictions = 2`
+- Accuracy: `0.606`
+- Precision macro: `0.3008562918838421`
+- Recall macro: `0.30886609210187804`
+- F1 macro: `0.2917741323463905`
+- BioASQ / BM25 / zero-shot / Llama-3.1-70B-Instruct
+- `n = 618`
+- `missing_predictions = 0`
+- Accuracy: `0.8317152103559871`
+- Precision macro: `0.8490629136765833`
+- Recall macro: `0.7843900777657944`
+- F1 macro: `0.8018278018278018`
 
 Values in the LaTeX table are reported as percentages.
 
@@ -46,9 +60,9 @@ Values in the LaTeX table are reported as percentages.
 Zero-shot
 & 86.80 & 87.16 & 86.96 & 87.14
 & 78.80 & 77.89 & 78.12 & 78.40
-& -- & -- & -- & --
-& -- & -- & -- & --
-& -- & -- & -- & -- \\
+& 30.09 & 30.89 & 29.18 & 60.60
+& 84.91 & 78.44 & 80.18 & 83.17
+& 70.15 & 68.59 & 68.61 & 77.33 \\
 
 BM25 RAG
 & -- & -- & -- & --
