@@ -1,0 +1,89 @@
+# Llama 3.1 70B Results Table
+
+Current filled result:
+
+- MMLU / BM25 / zero-shot / Llama-3.1-70B-Instruct
+- `n = 1089`
+- `missing_predictions = 0`
+- Accuracy: `0.8714416896235078`
+- Precision macro: `0.8680315537269185`
+- Recall macro: `0.8715694678185778`
+- F1 macro: `0.8695903739632252`
+
+Values in the LaTeX table are reported as percentages.
+
+```latex
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lcccccccccccccccccccc}
+\toprule
+& \multicolumn{4}{c}{MMLU}
+& \multicolumn{4}{c}{MedQA}
+& \multicolumn{4}{c}{PubMedQA}
+& \multicolumn{4}{c}{BioASQ}
+& \multicolumn{4}{c}{Average} \\
+\cmidrule(lr){2-5}
+\cmidrule(lr){6-9}
+\cmidrule(lr){10-13}
+\cmidrule(lr){14-17}
+\cmidrule(lr){18-21}
+\textbf{Llama-3.1-70B-Instruct}
+& P & R & F1 & Acc
+& P & R & F1 & Acc
+& P & R & F1 & Acc
+& P & R & F1 & Acc
+& P & R & F1 & Acc \\
+\midrule
+Zero-shot
+& 86.80 & 87.16 & 86.96 & 87.14
+& -- & -- & -- & --
+& -- & -- & -- & --
+& -- & -- & -- & --
+& -- & -- & -- & -- \\
+
+BM25 RAG
+& -- & -- & -- & --
+& -- & -- & -- & --
+& -- & -- & -- & --
+& -- & -- & -- & --
+& -- & -- & -- & -- \\
+
+BM25 FRAG
+& -- & -- & -- & --
+& -- & -- & -- & --
+& -- & -- & -- & --
+& -- & -- & -- & --
+& -- & -- & -- & -- \\
+
+Contriever RAG
+& -- & -- & -- & --
+& -- & -- & -- & --
+& -- & -- & -- & --
+& -- & -- & -- & --
+& -- & -- & -- & -- \\
+
+Contriever FRAG
+& -- & -- & -- & --
+& -- & -- & -- & --
+& -- & -- & -- & --
+& -- & -- & -- & --
+& -- & -- & -- & -- \\
+\bottomrule
+\end{tabular}
+\caption{Evaluation results for Llama-3.1-70B-Instruct on the MIRAGE medical question answering benchmarks. We report macro precision (P), macro recall (R), macro F1 (F1), and accuracy (Acc) for zero-shot prompting, standard retrieval-augmented generation (RAG), and factuality-aware retrieval-augmented generation (FRAG). RAG and FRAG are evaluated with BM25 and Contriever retrieval over Wikipedia passages. The Average columns report the arithmetic mean across MMLU, MedQA, PubMedQA, and BioASQ.}
+\label{tab:llama31_70b_frag_results}
+\end{table*}
+```
+
+## Metric Mapping
+
+For each completed experiment, fill columns in this order:
+
+```text
+P   = precision_macro * 100
+R   = recall_macro * 100
+F1  = f1_macro * 100
+Acc = accuracy * 100
+```
