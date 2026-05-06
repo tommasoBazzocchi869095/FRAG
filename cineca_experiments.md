@@ -69,6 +69,27 @@ Approximate full-job wall times:
 
 All jobs request 4 GPUs. Running two jobs in parallel requests 8 GPUs.
 
+## Two-At-A-Time Schedule
+
+If running two jobs at a time, use this cadence. The check-back time is when it is reasonable to log in again and submit the next pair.
+
+| Round | Jobs | Check Back After |
+|---:|---|---:|
+| 1 | `medqa/bm25/zero_shot` + `mmlu/bm25/zero_shot` | ~2h |
+| 2 | `bioasq/bm25/zero_shot` + `pubmedqa/bm25/zero_shot` | ~1h |
+| 3 | `medqa/contriever/zero_shot` + `mmlu/contriever/zero_shot` | ~2h |
+| 4 | `bioasq/contriever/zero_shot` + `pubmedqa/contriever/zero_shot` | ~1h |
+| 5 | `medqa/bm25/standard_rag` + `mmlu/bm25/standard_rag` | ~2.5h |
+| 6 | `bioasq/bm25/standard_rag` + `pubmedqa/bm25/standard_rag` | ~1.5h |
+| 7 | `medqa/contriever/standard_rag` + `mmlu/contriever/standard_rag` | ~2.5h |
+| 8 | `bioasq/contriever/standard_rag` + `pubmedqa/contriever/standard_rag` | ~1.5h |
+| 9 | `medqa/bm25/frag` + `mmlu/bm25/frag` | ~2.5h |
+| 10 | `bioasq/bm25/frag` + `pubmedqa/bm25/frag` | ~1.5h |
+| 11 | `medqa/contriever/frag` + `mmlu/contriever/frag` | ~2.5h |
+| 12 | `bioasq/contriever/frag` + `pubmedqa/contriever/frag` | ~1.5h |
+
+The first full pair currently being run is Round 1. If queue wait time is high, add that wait time on top of the estimate.
+
 ## Submit Zero-Shot Jobs
 
 Recommended: start with two jobs in parallel, then submit more as jobs finish.
