@@ -30,6 +30,34 @@ Current filled result:
 - Precision macro: `0.8490629136765833`
 - Recall macro: `0.7843900777657944`
 - F1 macro: `0.8018278018278018`
+- PubMedQA / BM25 / standard_rag / Llama-3.1-70B-Instruct
+- `n = 500`
+- `missing_predictions = 1`
+- Accuracy: `0.546`
+- Precision macro: `0.2880992588422929`
+- Recall macro: `0.29336073625371284`
+- F1 macro: `0.28362965978802757`
+- PubMedQA / BM25 / frag / Llama-3.1-70B-Instruct
+- `n = 500`
+- `missing_predictions = 1`
+- Accuracy: `0.548`
+- Precision macro: `0.29413807189542485`
+- Recall macro: `0.2959870118732995`
+- F1 macro: `0.2858113517352656`
+- PubMedQA / Contriever / standard_rag / Llama-3.1-70B-Instruct
+- `n = 500`
+- `missing_predictions = 1`
+- Accuracy: `0.55`
+- Precision macro: `0.2699662594316012`
+- Recall macro: `0.29440013720950176`
+- F1 macro: `0.28116553382621834`
+- PubMedQA / Contriever / frag / Llama-3.1-70B-Instruct
+- `n = 500`
+- `missing_predictions = 1`
+- Accuracy: `0.556`
+- Precision macro: `0.27233110466184196`
+- Recall macro: `0.2982645141926078`
+- F1 macro: `0.28415697674418605`
 
 Values in the LaTeX table are reported as percentages.
 
@@ -67,28 +95,28 @@ Zero-shot
 BM25 RAG
 & -- & -- & -- & --
 & -- & -- & -- & --
-& -- & -- & -- & --
+& 28.81 & 29.34 & 28.36 & 54.60
 & -- & -- & -- & --
 & -- & -- & -- & -- \\
 
 BM25 FRAG
 & -- & -- & -- & --
 & -- & -- & -- & --
-& -- & -- & -- & --
+& 29.41 & 29.60 & 28.58 & 54.80
 & -- & -- & -- & --
 & -- & -- & -- & -- \\
 
 Contriever RAG
 & -- & -- & -- & --
 & -- & -- & -- & --
-& -- & -- & -- & --
+& 27.00 & 29.44 & 28.12 & 55.00
 & -- & -- & -- & --
 & -- & -- & -- & -- \\
 
 Contriever FRAG
 & -- & -- & -- & --
 & -- & -- & -- & --
-& -- & -- & -- & --
+& 27.23 & 29.83 & 28.42 & 55.60
 & -- & -- & -- & --
 & -- & -- & -- & -- \\
 \bottomrule
