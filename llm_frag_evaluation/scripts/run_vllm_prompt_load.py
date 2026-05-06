@@ -68,6 +68,27 @@ def batches(items, batch_size):
         yield items[start : start + batch_size]
 
 
+def build_error_record(record, error_type, error_message, raw_record=None):
+    payload = {
+        "request_id": record.get("request_id"),
+        "dataset": record.get("dataset"),
+        "retriever": record.get("retriever"),
+        "experiment": record.get("experiment"),
+        "question_number": record.get("question_number"),
+        "output_file": record.get("output_file"),
+        "error_type": error_type,
+        "error_message": error_message,
+    }
+    if raw_record:
+        payload.update(raw_record)
+    return payload
+
+
+def write_jsonl(handle, payload):
+    handle.write(json.dumps(payload, ensure_ascii=False) + "\n")
+    handle.flush()
+
+
 def parse_answer(raw_answer, dataset):
     answer_choice = "NA"
     step_by_step = ""
@@ -135,6 +156,11 @@ def write_prediction(output_dir, record, answer_choice, step_by_step):
     return output_path
 
 
+def generate_batch(llm, sampling_params, batch):
+    prompts = [record["model_input_text"] for record in batch]
+    return llm.generate(prompts, sampling_params)
+
+
 def main():
     args = parse_args()
     prompt_load = resolve_repo_path(args.prompt_load)
@@ -167,11 +193,24 @@ def main():
 
     to_run = []
     skipped = 0
+    preflight_error_records = []
     for record in records:
         if args.skip_existing and (output_dir / record["output_file"]).exists():
             skipped += 1
             continue
         record["model_input_text"] = render_prompt(tokenizer, record["messages"])
+        prompt_token_count = len(tokenizer(record["model_input_text"]).input_ids)
+        record["prompt_token_count_preflight"] = prompt_token_count
+        if prompt_token_count > args.max_model_len:
+            preflight_error_records.append(
+                build_error_record(
+                    record,
+                    "PromptTooLong",
+                    f"Prompt has {prompt_token_count} tokens, exceeding max_model_len={args.max_model_len}.",
+                    {"prompt_tokens": prompt_token_count},
+                )
+            )
+            continue
         to_run.append(record)
 
     start_time = time.time()
@@ -182,11 +221,35 @@ def main():
     generated_tokens_total = 0
 
     with raw_output_path.open("a", encoding="utf-8") as raw_f, error_output_path.open("a", encoding="utf-8") as err_f:
-        for batch in batches(to_run, args.batch_size):
-            prompts = [record["model_input_text"] for record in batch]
-            outputs = llm.generate(prompts, sampling_params)
+        for error_record in preflight_error_records:
+            error_count += 1
+            error_types[error_record["error_type"]] += 1
+            write_jsonl(err_f, error_record)
 
-            for record, output in zip(batch, outputs):
+        for batch in batches(to_run, args.batch_size):
+            try:
+                outputs = generate_batch(llm, sampling_params, batch)
+                batch_outputs = list(zip(batch, outputs))
+            except Exception as exc:
+                batch_outputs = []
+                for record in batch:
+                    try:
+                        output = generate_batch(llm, sampling_params, [record])[0]
+                        batch_outputs.append((record, output))
+                    except Exception as record_exc:
+                        error_count += 1
+                        error_types[type(record_exc).__name__] += 1
+                        write_jsonl(
+                            err_f,
+                            build_error_record(
+                                record,
+                                type(record_exc).__name__,
+                                str(record_exc),
+                                {"prompt_tokens": record.get("prompt_token_count_preflight", 0)},
+                            ),
+                        )
+
+            for record, output in batch_outputs:
                 generated_text = output.outputs[0].text if output.outputs else ""
                 prompt_tokens = len(output.prompt_token_ids or [])
                 generated_tokens = len(output.outputs[0].token_ids) if output.outputs else 0
@@ -204,19 +267,21 @@ def main():
                     "generated_tokens": generated_tokens,
                     "raw_output": generated_text,
                 }
-                raw_f.write(json.dumps(raw_record, ensure_ascii=False) + "\n")
-                raw_f.flush()
+                write_jsonl(raw_f, raw_record)
 
                 answer_choice, step_by_step = parse_answer(generated_text, record["dataset"])
                 if not is_valid_answer(answer_choice, record["dataset"]):
                     error_count += 1
                     error_types["InvalidAnswer"] += 1
-                    err_f.write(json.dumps({
-                        **raw_record,
-                        "parsed_answer_choice": answer_choice,
-                        "error_type": "InvalidAnswer",
-                    }, ensure_ascii=False) + "\n")
-                    err_f.flush()
+                    write_jsonl(
+                        err_f,
+                        build_error_record(
+                            record,
+                            "InvalidAnswer",
+                            "Generated answer_choice is not valid for this dataset.",
+                            {**raw_record, "parsed_answer_choice": answer_choice},
+                        ),
+                    )
                     continue
 
                 write_prediction(output_dir, record, answer_choice, step_by_step)
@@ -229,6 +294,7 @@ def main():
         "model_path": args.model_path,
         "prompt_count": len(records),
         "skipped_existing": skipped,
+        "preflight_error_count": len(preflight_error_records),
         "submitted_prompt_count": len(to_run),
         "parsed_record_count": parsed_count,
         "error_record_count": error_count,
