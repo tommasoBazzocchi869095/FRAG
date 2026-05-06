@@ -4,15 +4,6 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-try:
-    from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-except ImportError as exc:
-    raise SystemExit(
-        "scikit-learn is required for evaluation. Install it with: "
-        "pip install -r llm_frag_evaluation/requirements.txt"
-    ) from exc
-
-
 ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = ROOT.parents[0]
 sys.path.insert(0, str(REPO_ROOT))
@@ -42,14 +33,51 @@ def load_prediction(path):
     return "NA"
 
 
-def normalize_answer(answer):
+LETTER_TO_YNM = {
+    "A": "yes",
+    "B": "no",
+    "C": "maybe",
+}
+
+LETTER_TO_YN = {
+    "A": "yes",
+    "B": "no",
+}
+
+
+def normalize_answer(answer, dataset):
     answer = str(answer).strip()
+    answer_upper = answer.upper()
+    answer_lower = answer.lower()
+
+    if dataset == "pubmedqa":
+        if answer_upper in LETTER_TO_YNM:
+            return LETTER_TO_YNM[answer_upper]
+        if answer_lower in {"yes", "no", "maybe"}:
+            return answer_lower
+        return "NA"
+
+    if dataset == "bioasq":
+        if answer_upper in LETTER_TO_YN:
+            return LETTER_TO_YN[answer_upper]
+        if answer_lower in {"yes", "no"}:
+            return answer_lower
+        return "NA"
+
     if len(answer) > 1 and answer[0].isalpha():
         return answer[0].upper()
     return answer.upper()
 
 
 def main():
+    try:
+        from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+    except ImportError as exc:
+        raise SystemExit(
+            "scikit-learn is required for evaluation. Install it with: "
+            "pip install -r llm_frag_evaluation/requirements.txt"
+        ) from exc
+
     args = parse_args()
     config = load_json(args.config)
     input_dir = resolve_repo_path(config["input_dir"])
@@ -65,7 +93,7 @@ def main():
     for question in iter_input_questions(input_dir, input_files=input_files):
         dataset = question.get("dataset") or "unknown_dataset"
         if "answer" in question:
-            gold_by_dataset[dataset].append(normalize_answer(question["answer"]))
+            gold_by_dataset[dataset].append(normalize_answer(question["answer"], dataset))
 
     y_true = gold_by_dataset[args.dataset]
     y_pred = []
@@ -76,7 +104,7 @@ def main():
             missing.append(str(path))
             y_pred.append("NA")
             continue
-        y_pred.append(normalize_answer(load_prediction(path)))
+        y_pred.append(normalize_answer(load_prediction(path), args.dataset))
 
     metrics = {
         "dataset": args.dataset,
