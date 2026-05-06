@@ -58,6 +58,34 @@ Current filled result:
 - Precision macro: `0.27233110466184196`
 - Recall macro: `0.2982645141926078`
 - F1 macro: `0.28415697674418605`
+- BioASQ / BM25 / standard_rag / Llama-3.1-70B-Instruct
+- `n = 618`
+- `missing_predictions = 0`
+- Accuracy: `0.7928802588996764`
+- Precision macro: `0.7795507078109521`
+- Recall macro: `0.7979451666004428`
+- F1 macro: `0.7838971938106478`
+- BioASQ / BM25 / frag / Llama-3.1-70B-Instruct
+- `n = 618`
+- `missing_predictions = 0`
+- Accuracy: `0.7944983818770227`
+- Precision macro: `0.7805664730006836`
+- Recall macro: `0.7982346597036953`
+- F1 macro: `0.7851364558438252`
+- BioASQ / Contriever / standard_rag / Llama-3.1-70B-Instruct
+- `n = 618`
+- `missing_predictions = 0`
+- Accuracy: `0.8058252427184466`
+- Precision macro: `0.7968073336494389`
+- Recall macro: `0.8197877050576148`
+- F1 macro: `0.7994721813619452`
+- BioASQ / Contriever / frag / Llama-3.1-70B-Instruct
+- `n = 618`
+- `missing_predictions = 0`
+- Accuracy: `0.7928802588996764`
+- Precision macro: `0.7850674687897687`
+- Recall macro: `0.8077084634160187`
+- F1 macro: `0.7866022099447514`
 
 Values in the LaTeX table are reported as percentages.
 
@@ -96,28 +124,28 @@ BM25 RAG
 & -- & -- & -- & --
 & -- & -- & -- & --
 & 28.81 & 29.34 & 28.36 & 54.60
-& -- & -- & -- & --
+& 77.96 & 79.79 & 78.39 & 79.29
 & -- & -- & -- & -- \\
 
 BM25 FRAG
 & -- & -- & -- & --
 & -- & -- & -- & --
 & 29.41 & 29.60 & 28.58 & 54.80
-& -- & -- & -- & --
+& 78.06 & 79.82 & 78.51 & 79.45
 & -- & -- & -- & -- \\
 
 Contriever RAG
 & -- & -- & -- & --
 & -- & -- & -- & --
 & 27.00 & 29.44 & 28.12 & 55.00
-& -- & -- & -- & --
+& 79.68 & 81.98 & 79.95 & 80.58
 & -- & -- & -- & -- \\
 
 Contriever FRAG
 & -- & -- & -- & --
 & -- & -- & -- & --
 & 27.23 & 29.83 & 28.42 & 55.60
-& -- & -- & -- & --
+& 78.51 & 80.77 & 78.66 & 79.29
 & -- & -- & -- & -- \\
 \bottomrule
 \end{tabular}
