@@ -75,20 +75,42 @@ All jobs request 4 GPUs. Running two jobs in parallel requests 8 GPUs.
 
 If running two jobs at a time, use this cadence. The check-back time is when it is reasonable to log in again and submit the next pair.
 
-|       Round | Jobs | Check Back After |
-|------------:|---|---:|
-| 1 (Running) | `medqa/bm25/zero_shot` + `mmlu/bm25/zero_shot` | ~2h |
-|           2 | `bioasq/bm25/zero_shot` + `pubmedqa/bm25/zero_shot` | ~1h |
-|           3 | `medqa/bm25/standard_rag` + `mmlu/bm25/standard_rag` | ~2.5h |
-|           4 | `bioasq/bm25/standard_rag` + `pubmedqa/bm25/standard_rag` | ~1.5h |
-|           5 | `medqa/contriever/standard_rag` + `mmlu/contriever/standard_rag` | ~2.5h |
-|           6 | `bioasq/contriever/standard_rag` + `pubmedqa/contriever/standard_rag` | ~1.5h |
-|           7 | `medqa/bm25/frag` + `mmlu/bm25/frag` | ~2.5h |
-|           8 | `bioasq/bm25/frag` + `pubmedqa/bm25/frag` | ~1.5h |
-|           9 | `medqa/contriever/frag` + `mmlu/contriever/frag` | ~2.5h |
-|          10 | `bioasq/contriever/frag` + `pubmedqa/contriever/frag` | ~1.5h |
+|         Round | Jobs | Check Back After |
+|--------------:|---|---:|
+| 1 (Completed) | `medqa/bm25/zero_shot` + `mmlu/bm25/zero_shot` | ~2h |
+| 2 (Completed) | `bioasq/bm25/zero_shot` + `pubmedqa/bm25/zero_shot` | ~1h |
+|             3 | `medqa/bm25/standard_rag` + `mmlu/bm25/standard_rag` | ~2.5h |
+| 4 (Partially submitted) | `bioasq/bm25/standard_rag` + `pubmedqa/bm25/standard_rag` | ~1.5h |
+|             5 | `medqa/contriever/standard_rag` + `mmlu/contriever/standard_rag` | ~2.5h |
+| 6 (Partially submitted) | `bioasq/contriever/standard_rag` + `pubmedqa/contriever/standard_rag` | ~1.5h |
+|             7 | `medqa/bm25/frag` + `mmlu/bm25/frag` | ~2.5h |
+| 8 (Partially submitted) | `bioasq/bm25/frag` + `pubmedqa/bm25/frag` | ~1.5h |
+|             9 | `medqa/contriever/frag` + `mmlu/contriever/frag` | ~2.5h |
+| 10 (Partially submitted) | `bioasq/contriever/frag` + `pubmedqa/contriever/frag` | ~1.5h |
 
-The first full pair currently being run is Round 1. If queue wait time is high, add that wait time on top of the estimate.
+Current deviation from the pair schedule: the four PubMedQA RAG/FRAG jobs were submitted together. If queue wait time is high, add that wait time on top of the estimate.
+
+## Current Job Status
+
+Completed:
+
+| Dataset | Retriever | Experiment | Status |
+|---|---|---|---|
+| mmlu | bm25 | zero_shot | Completed, metrics recorded |
+| medqa | bm25 | zero_shot | Completed, metrics recorded |
+| pubmedqa | bm25 | zero_shot | Completed, metrics recorded with 2 missing/invalid predictions |
+| bioasq | bm25 | zero_shot | Completed, metrics recorded |
+
+Submitted:
+
+| Job ID | Dataset | Retriever | Experiment | SLURM State |
+|---:|---|---|---|---|
+| 40995888 | pubmedqa | bm25 | standard_rag | Running at last check |
+| 40995896 | pubmedqa | bm25 | frag | Running at last check |
+| 40995903 | pubmedqa | contriever | standard_rag | Pending at last check |
+| 40995913 | pubmedqa | contriever | frag | Pending at last check |
+
+The exact prompt-load path appears in each job's `.out` file at completion. Before completion, use `scontrol show job <JOBID>` to inspect the exported `PROMPT_LOAD_PATH` if available.
 
 ## Submit Zero-Shot Jobs
 
