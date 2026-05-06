@@ -9,6 +9,13 @@ Current filled result:
 - Precision macro: `0.8680315537269185`
 - Recall macro: `0.8715694678185778`
 - F1 macro: `0.8695903739632252`
+- MedQA / BM25 / zero-shot / Llama-3.1-70B-Instruct
+- `n = 1273`
+- `missing_predictions = 0`
+- Accuracy: `0.783974862529458`
+- Precision macro: `0.7880424652768914`
+- Recall macro: `0.7788646197680493`
+- F1 macro: `0.781184669047834`
 
 Values in the LaTeX table are reported as percentages.
 
@@ -38,7 +45,7 @@ Values in the LaTeX table are reported as percentages.
 \midrule
 Zero-shot
 & 86.80 & 87.16 & 86.96 & 87.14
-& -- & -- & -- & --
+& 78.80 & 77.89 & 78.12 & 78.40
 & -- & -- & -- & --
 & -- & -- & -- & --
 & -- & -- & -- & -- \\
