@@ -79,16 +79,16 @@ If running two jobs at a time, use this cadence. The check-back time is when it 
 |--------------:|---|---:|
 | 1 (Completed) | `medqa/bm25/zero_shot` + `mmlu/bm25/zero_shot` | ~2h |
 | 2 (Completed) | `bioasq/bm25/zero_shot` + `pubmedqa/bm25/zero_shot` | ~1h |
-|             3 | `medqa/bm25/standard_rag` + `mmlu/bm25/standard_rag` | ~2.5h |
-| 4 (PubMedQA completed, BioASQ submitted) | `bioasq/bm25/standard_rag` + `pubmedqa/bm25/standard_rag` | ~1.5h |
-|             5 | `medqa/contriever/standard_rag` + `mmlu/contriever/standard_rag` | ~2.5h |
-| 6 (PubMedQA completed, BioASQ submitted) | `bioasq/contriever/standard_rag` + `pubmedqa/contriever/standard_rag` | ~1.5h |
-|             7 | `medqa/bm25/frag` + `mmlu/bm25/frag` | ~2.5h |
-| 8 (PubMedQA completed, BioASQ submitted) | `bioasq/bm25/frag` + `pubmedqa/bm25/frag` | ~1.5h |
-|             9 | `medqa/contriever/frag` + `mmlu/contriever/frag` | ~2.5h |
-| 10 (PubMedQA completed, BioASQ submitted) | `bioasq/contriever/frag` + `pubmedqa/contriever/frag` | ~1.5h |
+| 3 (MedQA submitted, MMLU remaining) | `medqa/bm25/standard_rag` + `mmlu/bm25/standard_rag` | ~2.5h |
+| 4 (Completed) | `bioasq/bm25/standard_rag` + `pubmedqa/bm25/standard_rag` | ~1.5h |
+| 5 (MedQA submitted, MMLU remaining) | `medqa/contriever/standard_rag` + `mmlu/contriever/standard_rag` | ~2.5h |
+| 6 (Completed) | `bioasq/contriever/standard_rag` + `pubmedqa/contriever/standard_rag` | ~1.5h |
+| 7 (MedQA submitted, MMLU remaining) | `medqa/bm25/frag` + `mmlu/bm25/frag` | ~2.5h |
+| 8 (Completed) | `bioasq/bm25/frag` + `pubmedqa/bm25/frag` | ~1.5h |
+| 9 (MedQA submitted, MMLU remaining) | `medqa/contriever/frag` + `mmlu/contriever/frag` | ~2.5h |
+| 10 (Completed) | `bioasq/contriever/frag` + `pubmedqa/contriever/frag` | ~1.5h |
 
-Current deviation from the pair schedule: the four PubMedQA RAG/FRAG jobs were run together and completed; the four BioASQ RAG/FRAG jobs are now submitted together. If queue wait time is high, add that wait time on top of the estimate.
+Current deviation from the pair schedule: PubMedQA and BioASQ RAG/FRAG blocks were run as four-job batches and completed; the four MedQA RAG/FRAG jobs are now submitted together. After MedQA finishes, the last remaining block is MMLU RAG/FRAG.
 
 ## Current Job Status
 
@@ -104,15 +104,28 @@ Completed:
 | pubmedqa | bm25 | frag | Completed, metrics recorded with 1 missing/invalid prediction |
 | pubmedqa | contriever | standard_rag | Completed, metrics recorded with 1 missing/invalid prediction |
 | pubmedqa | contriever | frag | Completed, metrics recorded with 1 missing/invalid prediction |
+| bioasq | bm25 | standard_rag | Completed, metrics recorded |
+| bioasq | bm25 | frag | Completed, metrics recorded |
+| bioasq | contriever | standard_rag | Completed, metrics recorded |
+| bioasq | contriever | frag | Completed, metrics recorded |
 
 Submitted:
 
 | Job ID | Dataset | Retriever | Experiment | SLURM State |
 |---:|---|---|---|---|
-| 41000410 | bioasq | bm25 | standard_rag | Running at last check |
-| 41000414 | bioasq | bm25 | frag | Running at last check |
-| 41000419 | bioasq | contriever | standard_rag | Pending at last check |
-| 41000425 | bioasq | contriever | frag | Pending at last check |
+| 41004143 | medqa | bm25 | standard_rag | Running at last check |
+| 41004148 | medqa | bm25 | frag | Running at last check |
+| 41004156 | medqa | contriever | standard_rag | Pending at last check |
+| 41004162 | medqa | contriever | frag | Pending at last check |
+
+Last remaining block after MedQA:
+
+| Dataset | Retriever | Experiment |
+|---|---|---|
+| mmlu | bm25 | standard_rag |
+| mmlu | bm25 | frag |
+| mmlu | contriever | standard_rag |
+| mmlu | contriever | frag |
 
 The exact prompt-load path appears in each job's `.out` file at completion. Before completion, use `scontrol show job <JOBID>` to inspect the exported `PROMPT_LOAD_PATH` if available.
 
