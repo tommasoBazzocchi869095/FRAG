@@ -67,26 +67,26 @@ Approximate full-job wall times:
 | mmlu | 1089 | ~1h 35m | ~1h 55m |
 | pubmedqa | 500 | ~45 min | ~55 min |
 
+The full campaign now has 20 jobs: 4 zero-shot jobs, 8 standard RAG jobs, and 8 FRAG jobs. Zero-shot is not retriever-specific and should only be run once per dataset using the `bm25/zero_shot` prompt loads.
+
 All jobs request 4 GPUs. Running two jobs in parallel requests 8 GPUs.
 
 ## Two-At-A-Time Schedule
 
 If running two jobs at a time, use this cadence. The check-back time is when it is reasonable to log in again and submit the next pair.
 
-| Round | Jobs | Check Back After |
-|---:|---|---:|
-| 1 | `medqa/bm25/zero_shot` + `mmlu/bm25/zero_shot` | ~2h |
-| 2 | `bioasq/bm25/zero_shot` + `pubmedqa/bm25/zero_shot` | ~1h |
-| 3 | `medqa/contriever/zero_shot` + `mmlu/contriever/zero_shot` | ~2h |
-| 4 | `bioasq/contriever/zero_shot` + `pubmedqa/contriever/zero_shot` | ~1h |
-| 5 | `medqa/bm25/standard_rag` + `mmlu/bm25/standard_rag` | ~2.5h |
-| 6 | `bioasq/bm25/standard_rag` + `pubmedqa/bm25/standard_rag` | ~1.5h |
-| 7 | `medqa/contriever/standard_rag` + `mmlu/contriever/standard_rag` | ~2.5h |
-| 8 | `bioasq/contriever/standard_rag` + `pubmedqa/contriever/standard_rag` | ~1.5h |
-| 9 | `medqa/bm25/frag` + `mmlu/bm25/frag` | ~2.5h |
-| 10 | `bioasq/bm25/frag` + `pubmedqa/bm25/frag` | ~1.5h |
-| 11 | `medqa/contriever/frag` + `mmlu/contriever/frag` | ~2.5h |
-| 12 | `bioasq/contriever/frag` + `pubmedqa/contriever/frag` | ~1.5h |
+|       Round | Jobs | Check Back After |
+|------------:|---|---:|
+| 1 (Running) | `medqa/bm25/zero_shot` + `mmlu/bm25/zero_shot` | ~2h |
+|           2 | `bioasq/bm25/zero_shot` + `pubmedqa/bm25/zero_shot` | ~1h |
+|           3 | `medqa/bm25/standard_rag` + `mmlu/bm25/standard_rag` | ~2.5h |
+|           4 | `bioasq/bm25/standard_rag` + `pubmedqa/bm25/standard_rag` | ~1.5h |
+|           5 | `medqa/contriever/standard_rag` + `mmlu/contriever/standard_rag` | ~2.5h |
+|           6 | `bioasq/contriever/standard_rag` + `pubmedqa/contriever/standard_rag` | ~1.5h |
+|           7 | `medqa/bm25/frag` + `mmlu/bm25/frag` | ~2.5h |
+|           8 | `bioasq/bm25/frag` + `pubmedqa/bm25/frag` | ~1.5h |
+|           9 | `medqa/contriever/frag` + `mmlu/contriever/frag` | ~2.5h |
+|          10 | `bioasq/contriever/frag` + `pubmedqa/contriever/frag` | ~1.5h |
 
 The first full pair currently being run is Round 1. If queue wait time is high, add that wait time on top of the estimate.
 
@@ -114,27 +114,7 @@ bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
   llm_frag_evaluation/outputs/prompt_loads/pubmedqa/bm25/zero_shot/Meta-Llama-3-70B-Instruct/prompts.jsonl
 ```
 
-The zero-shot prompts are duplicated across retrievers for the same dataset. For retriever-specific output layout, also run:
-
-```bash
-bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
-  llm_frag_evaluation/outputs/prompt_loads/medqa/contriever/zero_shot/Meta-Llama-3-70B-Instruct/prompts.jsonl
-```
-
-```bash
-bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
-  llm_frag_evaluation/outputs/prompt_loads/mmlu/contriever/zero_shot/Meta-Llama-3-70B-Instruct/prompts.jsonl
-```
-
-```bash
-bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
-  llm_frag_evaluation/outputs/prompt_loads/bioasq/contriever/zero_shot/Meta-Llama-3-70B-Instruct/prompts.jsonl
-```
-
-```bash
-bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
-  llm_frag_evaluation/outputs/prompt_loads/pubmedqa/contriever/zero_shot/Meta-Llama-3-70B-Instruct/prompts.jsonl
-```
+Zero-shot is not retriever-specific. Run it only once per dataset, using the `bm25/zero_shot` prompt loads.
 
 ## Submit Standard RAG Jobs
 

@@ -1,5 +1,6 @@
 import argparse
 import json
+import shutil
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -57,6 +58,25 @@ def safe_name(value):
     return str(value).replace("/", "__").replace("\\", "__").replace(" ", "_")
 
 
+def experiments_for_retriever(experiments, retriever, zero_shot_retriever):
+    if retriever in {zero_shot_retriever, "unknown_retriever"}:
+        return experiments
+    return [experiment for experiment in experiments if experiment != "zero_shot"]
+
+
+def remove_stale_zero_shot_prompt_loads(output_root, zero_shot_retriever):
+    output_root = Path(output_root)
+    if not output_root.exists():
+        return
+    for zero_shot_dir in output_root.glob("*/*/zero_shot"):
+        try:
+            retriever = zero_shot_dir.parent.name
+        except IndexError:
+            continue
+        if retriever != zero_shot_retriever:
+            shutil.rmtree(zero_shot_dir)
+
+
 def main():
     args = parse_args()
     config = load_json(args.config)
@@ -64,6 +84,7 @@ def main():
     output_root = resolve_repo_path(args.output_dir)
     templates = load_prompt_templates(resolve_repo_path(config["prompt_file"]))
     experiments = [args.experiment] if args.experiment else config["experiments"]
+    zero_shot_retriever = config.get("zero_shot_retriever", "bm25")
     input_files = get_input_files(input_dir, args, config)
 
     if not input_files:
@@ -73,17 +94,21 @@ def main():
     handles = {}
     manifest = []
     file_prefix = config.get("output_file_prefix", "test")
+    remove_stale_zero_shot_prompt_loads(output_root, zero_shot_retriever)
 
     try:
         for input_file in input_files:
             retriever = infer_retriever_from_path(input_file)
+            selected_experiments = experiments_for_retriever(experiments, retriever, zero_shot_retriever)
+            if not selected_experiments:
+                continue
             for question in iter_input_questions(input_dir, input_files=[input_file]):
                 dataset = question.get("dataset") or "unknown_dataset"
                 source_key = (input_file, dataset)
                 question_number = counts[source_key]
                 counts[source_key] += 1
 
-                for experiment in experiments:
+                for experiment in selected_experiments:
                     item = prepare_experiment_item(
                         question,
                         experiment,

@@ -87,6 +87,14 @@ def load_records(path):
     return records
 
 
+def expected_experiments_for_retriever(config, retriever):
+    experiments = config.get("experiments", [])
+    zero_shot_retriever = config.get("zero_shot_retriever", "bm25")
+    if retriever in {zero_shot_retriever, "unknown_retriever"}:
+        return experiments
+    return [experiment for experiment in experiments if experiment != "zero_shot"]
+
+
 def validate_messages(record, errors):
     messages = record.get("messages")
     if not isinstance(messages, list) or len(messages) != 2:
@@ -199,7 +207,7 @@ def main():
         retriever = infer_retriever_from_path(input_path)
         model_dirs = list((prompt_load_root / dataset / retriever).glob("*/*")) if (prompt_load_root / dataset / retriever).exists() else []
 
-        expected_experiments = config.get("experiments", [])
+        expected_experiments = expected_experiments_for_retriever(config, retriever)
         for experiment in expected_experiments:
             experiment_dir = prompt_load_root / dataset / retriever / experiment
             if not experiment_dir.exists():

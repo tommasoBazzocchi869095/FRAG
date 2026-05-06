@@ -5,6 +5,7 @@
   "output_dir": "llm_frag_evaluation/outputs/predictions",
   "prompt_file": "llm_frag_evaluation/prompts/default_prompts.json",
   "experiments": ["zero_shot", "standard_rag", "frag"],
+  "zero_shot_retriever": "bm25",
   "top_k_context": 32,
   "frag_alpha": 0.6,
   "standard_rag_rank": "topicality_score",

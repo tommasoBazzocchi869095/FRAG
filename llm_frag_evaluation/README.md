@@ -6,6 +6,8 @@ This folder contains a separate line of experiments for evaluating different LLM
 2. `standard_rag`: question, answer options, instructions, and the top 32 topically relevant passages.
 3. `frag`: question, answer options, instructions, and the top 32 passages after aggregating topicality and factuality scores over the 100 retrieved passages.
 
+`zero_shot` does not use retrieval, so it is generated only once per dataset. By default those prompt loads are stored under the configured primary retriever, `bm25`.
+
 The FRAG score is:
 
 ```text
@@ -86,21 +88,29 @@ For `frag`, the code computes the aggregate score with `alpha = 0.6` for topical
 
 ## Output Format
 
-Predictions are saved with one folder per dataset, experiment, and LLM:
+Predictions are saved with one folder per dataset, retriever, experiment, and LLM:
 
 ```text
 outputs/predictions/
   medqa/
-    zero_shot/
-      llama-3-8b/
-        test_0.json
-        test_1.json
-    standard_rag/
-      llama-3-8b/
-        test_0.json
-    frag/
-      llama-3-8b/
-        test_0.json
+    bm25/
+      zero_shot/
+        llama-3-8b/
+          test_0.json
+          test_1.json
+      standard_rag/
+        llama-3-8b/
+          test_0.json
+      frag/
+        llama-3-8b/
+          test_0.json
+    contriever/
+      standard_rag/
+        llama-3-8b/
+          test_0.json
+      frag/
+        llama-3-8b/
+          test_0.json
 ```
 
 Each question file uses the evaluation-compatible list format:
@@ -137,7 +147,7 @@ Create prompt loads for CINECA inference with Llama 3 70B:
 python llm_frag_evaluation/scripts/create_prompt_loads.py --all-input-files
 ```
 
-Prompt loads are JSONL files saved per dataset, retriever, experiment, and model:
+Prompt loads are JSONL files saved per dataset, retriever, experiment, and model. Zero-shot prompt loads are generated only under `bm25` by default because they are not retriever-specific:
 
 ```text
 outputs/prompt_loads/
@@ -149,6 +159,8 @@ outputs/prompt_loads/
       standard_rag/
       frag/
     contriever/
+      standard_rag/
+      frag/
 ```
 
 Each line contains the request id, dataset, retriever, experiment, target `test_N.json` filename, chat `messages`, gold answer, and selected-passage trace. During inference on CINECA, apply the Llama tokenizer chat template to the `messages` field.
@@ -302,6 +314,8 @@ Expected result:
 errors: 0
 ```
 
+With the default four datasets and two retrievers, this creates 20 prompt-load files: 4 zero-shot files under `bm25`, plus 16 RAG/FRAG files under `bm25` and `contriever`.
+
 ### 8. Run One Smoke Job
 
 Start with one small smoke run before submitting full jobs:
@@ -357,6 +371,8 @@ Repeat for each prompt load you want to run. Prompt loads are organized as:
 ```text
 llm_frag_evaluation/outputs/prompt_loads/<dataset>/<retriever>/<experiment>/Meta-Llama-3-70B-Instruct/prompts.jsonl
 ```
+
+Do not submit `contriever/zero_shot`; zero-shot is not retriever-specific and is only generated under `bm25` by default.
 
 Examples:
 
