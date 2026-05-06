@@ -99,12 +99,21 @@ def validate_messages(record, errors):
     user_content = messages[1].get("content", "")
     if "answer_choice" not in user_content or "step_by_step_thinking" not in user_content:
         errors.append("user prompt is missing JSON answer schema")
-    if record["experiment"] == "zero_shot" and "Here are the relevant documents:" in user_content:
-        errors.append("zero_shot prompt contains document context")
-    if record["experiment"] in {"standard_rag", "frag"}:
+    if "Here is the question:" not in user_content:
+        errors.append("user prompt is missing MedRAG question header")
+    if "Here are the potential choices:" not in user_content:
+        errors.append("user prompt is missing MedRAG choices header")
+    if "Please think step-by-step and generate your output in json:" not in user_content:
+        errors.append("user prompt is missing MedRAG output instruction")
+    if record["experiment"] == "zero_shot":
+        if "Here are the relevant documents:" in user_content:
+            errors.append("zero_shot prompt contains document context header")
+        if "Document [0]" in user_content:
+            errors.append("zero_shot prompt contains formatted documents")
+    else:
         if "Here are the relevant documents:" not in user_content:
             errors.append(f"{record['experiment']} prompt is missing document context header")
-        if "Document [1]" not in user_content:
+        if "Document [0]" not in user_content:
             errors.append(f"{record['experiment']} prompt is missing formatted documents")
 
 

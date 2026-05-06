@@ -2,6 +2,21 @@ import json
 from pathlib import Path
 
 
+MEDRAG_SYSTEM = (
+    "You are a helpful medical expert, and your task is to answer a multi-choice medical question using the relevant "
+    "documents. Please first think step-by-step and then choose the answer from the provided options. Organize your "
+    "output in a json formatted as Dict{\"step_by_step_thinking\": Str(explanation), \"answer_choice\": "
+    "Str{A/B/C/...}}. Your responses will be used for research purposes only, so please have a definite answer."
+)
+
+COT_SYSTEM = (
+    "You are a helpful medical expert, and your task is to answer a multi-choice medical question. Please first think "
+    "step-by-step and then choose the answer from the provided options. Organize your output in a json formatted as "
+    "Dict{\"step_by_step_thinking\": Str(explanation), \"answer_choice\": Str{A/B/C/...}}. Your responses will be "
+    "used for research purposes only, so please have a definite answer."
+)
+
+
 def load_prompt_templates(path):
     with Path(path).open("r", encoding="utf-8") as f:
         return json.load(f)
@@ -19,11 +34,11 @@ def format_options(options):
 
 def format_context(passages):
     chunks = []
-    for idx, passage in enumerate(passages, start=1):
+    for idx, passage in enumerate(passages):
         title = passage.get("title") or passage.get("id") or f"Passage {idx}"
         content = passage.get("content") or passage.get("contents") or ""
         chunks.append(f"Document [{idx}] (Title: {title}) {content}")
-    return "\n\n".join(chunks)
+    return "\n".join(chunks)
 
 
 def get_question_type(dataset):
@@ -73,11 +88,15 @@ def format_dataset_question(question):
 def build_prompt(question, experiment, selected_passages, templates):
     formatted_question = format_dataset_question(question)
     context = format_context(selected_passages)
-    system = templates["system"]["medical_qa"]
+    system_templates = templates.get("system", {})
+    if experiment == "zero_shot":
+        system = system_templates.get("zero_shot", COT_SYSTEM)
+    else:
+        system = system_templates.get("medical_qa", MEDRAG_SYSTEM)
     user_template = templates[experiment]["user"]
     user = user_template.format(
         question=formatted_question,
-        options=format_options(question.get("options")),
+        options="",
         context=context,
     )
     return {

@@ -1,14 +1,15 @@
 {
   "system": {
-    "medical_qa": "You are a careful medical question answering assistant. Choose the single best answer when options are provided. Return only valid JSON."
+    "zero_shot": "You are a helpful medical expert, and your task is to answer a multi-choice medical question. Please first think step-by-step and then choose the answer from the provided options. Organize your output in a json formatted as Dict{\"step_by_step_thinking\": Str(explanation), \"answer_choice\": Str{A/B/C/...}}. Your responses will be used for research purposes only, so please have a definite answer.",
+    "medical_qa": "You are a helpful medical expert, and your task is to answer a multi-choice medical question using the relevant documents. Please first think step-by-step and then choose the answer from the provided options. Organize your output in a json formatted as Dict{\"step_by_step_thinking\": Str(explanation), \"answer_choice\": Str{A/B/C/...}}. Your responses will be used for research purposes only, so please have a definite answer."
   },
   "zero_shot": {
-    "user": "{question}"
+    "user": "\nHere is the question:\n{question}\n\nHere are the potential choices:\n{options}\n\nPlease think step-by-step and generate your output in json:\n"
   },
   "standard_rag": {
-    "user": "Here are the relevant documents:\n{context}\n\n{question}"
+    "user": "\nHere are the relevant documents:\n{context}\n\nHere is the question:\n{question}\n\nHere are the potential choices:\n{options}\n\nPlease think step-by-step and generate your output in json:\n"
   },
   "frag": {
-    "user": "Here are the relevant documents:\n{context}\n\n{question}"
+    "user": "\nHere are the relevant documents:\n{context}\n\nHere is the question:\n{question}\n\nHere are the potential choices:\n{options}\n\nPlease think step-by-step and generate your output in json:\n"
   }
 }
