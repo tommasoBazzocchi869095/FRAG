@@ -1,13 +1,16 @@
-# Tomorrow Checklist: Continue CINECA `llm_frag_evaluation`
+# CINECA `llm_frag_evaluation` Completion Notes
 
-Current state as of May 6, 2026:
+Current state as of May 7, 2026:
 
 - Prompt code is aligned with previous MedRAG templates and pushed to GitHub.
+- The completed experiments used Wikipedia as the retrieval resource, so their Step 2 inputs are the files under `llm_frag_evaluation/data/inputs/source_collection_wiki/`.
+- PubMed-backed reruns should use `llm_frag_evaluation/configs/pubmed_config.json`, which selects the matching files under `llm_frag_evaluation/data/inputs/source_collection_pubmed/` and writes collection-qualified prompt loads/predictions.
 - Zero-shot is not retriever-specific; run it only once per dataset using `bm25/zero_shot`.
 - Prompt loads should now be 20 files after regeneration, not 24.
 - RAG/FRAG require `GENERATE_MAX_MODEL_LEN=12288`.
 - Prompt length report shows 0 prompts over 12288 tokens; max prompt is 11025 tokens.
 - The vLLM runner logs individual prompt errors and continues instead of aborting the whole job.
+- All 20 planned full-generation jobs are complete and all metrics have been recorded in `llm_frag_evaluation/RESULTS_TABLE.md`.
 
 ## Completed Experiments
 
@@ -25,105 +28,59 @@ Current state as of May 6, 2026:
 | bioasq | bm25 | frag | Completed, metrics recorded |
 | bioasq | contriever | standard_rag | Completed, metrics recorded |
 | bioasq | contriever | frag | Completed, metrics recorded |
+| medqa | bm25 | standard_rag | Completed, metrics recorded |
+| medqa | bm25 | frag | Completed, metrics recorded |
+| medqa | contriever | standard_rag | Completed, metrics recorded |
+| medqa | contriever | frag | Completed, metrics recorded |
+| mmlu | bm25 | standard_rag | Completed, metrics recorded |
+| mmlu | bm25 | frag | Completed, metrics recorded |
+| mmlu | contriever | standard_rag | Completed, metrics recorded |
+| mmlu | contriever | frag | Completed, metrics recorded |
 
-## Currently Submitted
-
-MedQA RAG/FRAG jobs were submitted together:
-
-| Job ID | Dataset | Retriever | Experiment | Status at last check |
-|---:|---|---|---|---|
-| 41004143 | medqa | bm25 | standard_rag | Running |
-| 41004148 | medqa | bm25 | frag | Running |
-| 41004156 | medqa | contriever | standard_rag | Pending |
-| 41004162 | medqa | contriever | frag | Pending |
-
-Check status:
-
-```bash
-squeue -u $USER -o "%.18i %.9P %.20j %.8u %.2t %.10M %.10l %.6D %R"
-```
-
-## Last Remaining Experiment Block After MedQA Finishes
-
-| Dataset | Retriever | Experiment |
-|---|---|---|
-| mmlu | bm25 | standard_rag |
-| mmlu | bm25 | frag |
-| mmlu | contriever | standard_rag |
-| mmlu | contriever | frag |
-
-After MedQA finishes, MMLU is the final dataset block to run.
-
-## Validate MedQA When Jobs Finish
+## Last Metric Commands
 
 ```bash
 source .venv_frag/bin/activate
 
-python llm_frag_evaluation/scripts/validate_predictions.py \
-  --prompt-load llm_frag_evaluation/outputs/prompt_loads/medqa/bm25/standard_rag/Meta-Llama-3-70B-Instruct/prompts.jsonl
-
-python llm_frag_evaluation/scripts/validate_predictions.py \
-  --prompt-load llm_frag_evaluation/outputs/prompt_loads/medqa/bm25/frag/Meta-Llama-3-70B-Instruct/prompts.jsonl
-
-python llm_frag_evaluation/scripts/validate_predictions.py \
-  --prompt-load llm_frag_evaluation/outputs/prompt_loads/medqa/contriever/standard_rag/Meta-Llama-3-70B-Instruct/prompts.jsonl
-
-python llm_frag_evaluation/scripts/validate_predictions.py \
-  --prompt-load llm_frag_evaluation/outputs/prompt_loads/medqa/contriever/frag/Meta-Llama-3-70B-Instruct/prompts.jsonl
-```
-
-## Compute MedQA Metrics
-
-```bash
 python llm_frag_evaluation/scripts/evaluate_predictions.py \
-  --input-file cache_step2_medqa_scored_bm25.json \
+  --input-file source_collection_wiki/cache_step2_medqa_scored_bm25.json \
   --dataset medqa --retriever bm25 --experiment standard_rag \
   --llm Meta-Llama-3-70B-Instruct
 
 python llm_frag_evaluation/scripts/evaluate_predictions.py \
-  --input-file cache_step2_medqa_scored_bm25.json \
+  --input-file source_collection_wiki/cache_step2_medqa_scored_bm25.json \
   --dataset medqa --retriever bm25 --experiment frag \
   --llm Meta-Llama-3-70B-Instruct
 
 python llm_frag_evaluation/scripts/evaluate_predictions.py \
-  --input-file cache_step2_medqa_scored_contriever.json \
+  --input-file source_collection_wiki/cache_step2_medqa_scored_contriever.json \
   --dataset medqa --retriever contriever --experiment standard_rag \
   --llm Meta-Llama-3-70B-Instruct
 
 python llm_frag_evaluation/scripts/evaluate_predictions.py \
-  --input-file cache_step2_medqa_scored_contriever.json \
+  --input-file source_collection_wiki/cache_step2_medqa_scored_contriever.json \
   --dataset medqa --retriever contriever --experiment frag \
   --llm Meta-Llama-3-70B-Instruct
-```
 
-## Submit Final MMLU Jobs
+python llm_frag_evaluation/scripts/evaluate_predictions.py \
+  --input-file source_collection_wiki/cache_step2_mmlu_scored_bm25.json \
+  --dataset mmlu --retriever bm25 --experiment standard_rag \
+  --llm Meta-Llama-3-70B-Instruct
 
-BM25 RAG:
+python llm_frag_evaluation/scripts/evaluate_predictions.py \
+  --input-file source_collection_wiki/cache_step2_mmlu_scored_bm25.json \
+  --dataset mmlu --retriever bm25 --experiment frag \
+  --llm Meta-Llama-3-70B-Instruct
 
-```bash
-bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
-  llm_frag_evaluation/outputs/prompt_loads/mmlu/bm25/standard_rag/Meta-Llama-3-70B-Instruct/prompts.jsonl
-```
+python llm_frag_evaluation/scripts/evaluate_predictions.py \
+  --input-file source_collection_wiki/cache_step2_mmlu_scored_contriever.json \
+  --dataset mmlu --retriever contriever --experiment standard_rag \
+  --llm Meta-Llama-3-70B-Instruct
 
-BM25 FRAG:
-
-```bash
-bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
-  llm_frag_evaluation/outputs/prompt_loads/mmlu/bm25/frag/Meta-Llama-3-70B-Instruct/prompts.jsonl
-```
-
-Contriever RAG:
-
-```bash
-bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
-  llm_frag_evaluation/outputs/prompt_loads/mmlu/contriever/standard_rag/Meta-Llama-3-70B-Instruct/prompts.jsonl
-```
-
-Contriever FRAG:
-
-```bash
-bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
-  llm_frag_evaluation/outputs/prompt_loads/mmlu/contriever/frag/Meta-Llama-3-70B-Instruct/prompts.jsonl
+python llm_frag_evaluation/scripts/evaluate_predictions.py \
+  --input-file source_collection_wiki/cache_step2_mmlu_scored_contriever.json \
+  --dataset mmlu --retriever contriever --experiment frag \
+  --llm Meta-Llama-3-70B-Instruct
 ```
 
 ## Failure Handling

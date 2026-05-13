@@ -23,18 +23,21 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Create prompt loads for LLM FRAG evaluation.")
     parser.add_argument("--config", default="llm_frag_evaluation/configs/default_config.json")
     parser.add_argument("--input-file", action="append", default=None, help="Input JSON filename relative to input_dir. Can be repeated.")
-    parser.add_argument("--all-input-files", action="store_true", help="Use every cache_step2*.json file in input_dir.")
+    parser.add_argument("--all-input-files", action="store_true", help="Use every cache_step2*.json file in the configured input directory or collection.")
+    parser.add_argument("--input-collection", default=None, help="Optional subdirectory under input_dir, for example source_collection_pubmed.")
     parser.add_argument("--experiment", choices=["zero_shot", "standard_rag", "frag"], default=None)
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--model-alias", default="Meta-Llama-3-70B-Instruct")
-    parser.add_argument("--output-dir", default="llm_frag_evaluation/outputs/prompt_loads")
+    parser.add_argument("--output-dir", default=None)
     return parser.parse_args()
 
 
 def get_input_files(input_dir, args, config):
     input_dir = Path(input_dir)
+    input_collection = args.input_collection or config.get("input_collection")
+    search_dir = input_dir / input_collection if input_collection else input_dir
     if args.all_input_files:
-        return [path.name for path in sorted(input_dir.glob("cache_step2*.json"))]
+        return [path.relative_to(input_dir).as_posix() for path in sorted(search_dir.glob("cache_step2*.json"))]
     if args.input_file:
         return args.input_file
     return config.get("input_files")
@@ -81,10 +84,12 @@ def main():
     args = parse_args()
     config = load_json(args.config)
     input_dir = resolve_repo_path(config["input_dir"])
-    output_root = resolve_repo_path(args.output_dir)
+    output_dir = args.output_dir or config.get("prompt_load_output_dir", "llm_frag_evaluation/outputs/prompt_loads")
+    output_root = resolve_repo_path(output_dir)
     templates = load_prompt_templates(resolve_repo_path(config["prompt_file"]))
     experiments = [args.experiment] if args.experiment else config["experiments"]
     zero_shot_retriever = config.get("zero_shot_retriever", "bm25")
+    input_collection = args.input_collection or config.get("input_collection")
     input_files = get_input_files(input_dir, args, config)
 
     if not input_files:
@@ -128,6 +133,7 @@ def main():
                             "experiment": experiment,
                             "model": args.model,
                             "model_alias": args.model_alias,
+                            "input_collection": input_collection,
                             "input_file": input_file,
                             "prompt_load": str(out_path),
                         })

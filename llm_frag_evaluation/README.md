@@ -22,11 +22,17 @@ The default value is `alpha = 0.6`, meaning 60 percent topicality and 40 percent
 llm_frag_evaluation/
   configs/
     default_config.json
+    wiki_config.json
+    pubmed_config.json
     models.example.json
   data/
     inputs/
       README.md
       sample_question.json
+      source_collection_wiki/
+        cache_step2_<dataset>_scored_<retriever>.json
+      source_collection_pubmed/
+        cache_step2_<dataset>_scored_PubMed_<retriever>.json
     processed/
       .gitkeep
   outputs/
@@ -81,6 +87,18 @@ Each input file should contain either a single JSON object or a list of JSON obj
 The `answer` field is optional for generation, but required for the local metric script. The current code accepts common aliases for passage scores, but the preferred names are `score_topic` and `score_factuality`.
 
 Step 2 files named like `cache_step2_medqa_scored_bm25.json` are supported. If the question objects do not contain a `dataset` field, the dataset is inferred from the filename.
+
+The input files are now split by source collection:
+
+- Use `llm_frag_evaluation/data/inputs/source_collection_wiki/` for experiments where Wikipedia is the retrieval resource. The completed Llama 3.1 70B experiments reported in `RESULTS_TABLE.md` used this collection.
+- Use `llm_frag_evaluation/data/inputs/source_collection_pubmed/` for experiments where PubMed is the retrieval resource.
+
+When passing `--input-file`, include the path relative to `llm_frag_evaluation/data/inputs`, for example `source_collection_wiki/cache_step2_medqa_scored_bm25.json` or `source_collection_pubmed/cache_step2_medqa_scored_PubMed_bm25.json`.
+
+Use the collection-specific configs for full campaigns:
+
+- `llm_frag_evaluation/configs/wiki_config.json` selects all Wikipedia-source Step 2 files and writes outputs under `outputs/prompt_loads/source_collection_wiki` and `outputs/predictions/source_collection_wiki`.
+- `llm_frag_evaluation/configs/pubmed_config.json` selects all PubMed-source Step 2 files and writes outputs under `outputs/prompt_loads/source_collection_pubmed` and `outputs/predictions/source_collection_pubmed`.
 
 For `standard_rag`, the code sorts passages by topicality score and takes the first 32.
 
@@ -138,29 +156,35 @@ python llm_frag_evaluation/scripts/run_experiment.py --config llm_frag_evaluatio
 Run one Step 2 file explicitly:
 
 ```shell
-python llm_frag_evaluation/scripts/run_experiment.py --input-file cache_step2_medqa_scored_bm25.json --experiment frag
+python llm_frag_evaluation/scripts/run_experiment.py \
+  --config llm_frag_evaluation/configs/pubmed_config.json \
+  --input-file source_collection_pubmed/cache_step2_medqa_scored_PubMed_bm25.json \
+  --experiment frag
 ```
 
 Create prompt loads for CINECA inference with Llama 3 70B:
 
 ```shell
-python llm_frag_evaluation/scripts/create_prompt_loads.py --all-input-files
+python llm_frag_evaluation/scripts/create_prompt_loads.py \
+  --config llm_frag_evaluation/configs/pubmed_config.json \
+  --all-input-files
 ```
 
-Prompt loads are JSONL files saved per dataset, retriever, experiment, and model. Zero-shot prompt loads are generated only under `bm25` by default because they are not retriever-specific:
+Prompt loads are JSONL files saved per source collection, dataset, retriever, experiment, and model. Zero-shot prompt loads are generated only under `bm25` by default because they are not retriever-specific:
 
 ```text
 outputs/prompt_loads/
-  medqa/
-    bm25/
-      zero_shot/
-        Meta-Llama-3-70B-Instruct/
-          prompts.jsonl
-      standard_rag/
-      frag/
-    contriever/
-      standard_rag/
-      frag/
+  source_collection_pubmed/
+    medqa/
+      bm25/
+        zero_shot/
+          Meta-Llama-3-70B-Instruct/
+            prompts.jsonl
+        standard_rag/
+        frag/
+      contriever/
+        standard_rag/
+        frag/
 ```
 
 Each line contains the request id, dataset, retriever, experiment, target `test_N.json` filename, chat `messages`, gold answer, and selected-passage trace. During inference on CINECA, apply the Llama tokenizer chat template to the `messages` field.
@@ -168,7 +192,9 @@ Each line contains the request id, dataset, retriever, experiment, target `test_
 Validate generated prompt loads:
 
 ```shell
-python llm_frag_evaluation/scripts/validate_prompt_loads.py --all-input-files
+python llm_frag_evaluation/scripts/validate_prompt_loads.py \
+  --config llm_frag_evaluation/configs/pubmed_config.json \
+  --all-input-files
 ```
 
 ## vLLM Inference
@@ -273,15 +299,17 @@ Use the same `VLLM_VENV_ACTIVATE` path as your previous working vLLM project if 
 
 ### 6. Place Or Verify Step 2 Input Files
 
-The input files should be under:
+The input files should be under the source collection that matches the retrieval resource:
 
 ```text
-llm_frag_evaluation/data/inputs/
+llm_frag_evaluation/data/inputs/source_collection_wiki/
+llm_frag_evaluation/data/inputs/source_collection_pubmed/
 ```
 
-Expected examples:
+Use `source_collection_wiki` for Wikipedia-backed retrieval runs. These are the files used by the completed experiments in `RESULTS_TABLE.md`:
 
 ```text
+source_collection_wiki/
 cache_step2_medqa_scored_bm25.json
 cache_step2_medqa_scored_contriever.json
 cache_step2_mmlu_scored_bm25.json
@@ -292,6 +320,20 @@ cache_step2_bioasq_scored_bm25.json
 cache_step2_bioasq_scored_contriever.json
 ```
 
+Use `source_collection_pubmed` for PubMed-backed retrieval runs:
+
+```text
+source_collection_pubmed/
+cache_step2_medqa_scored_PubMed_bm25.json
+cache_step2_medqa_scored_PubMed_Contriever.json
+cache_step2_mmlu_scored_PubMed_bm25.json
+cache_step2_mmlu_scored_PubMed_Contriever.json
+cache_step2_pubmedqa_scored_PubMed_bm25.json
+cache_step2_pubmedqa_scored_PubMed_Contriever.json
+cache_step2_bioasq_scored_PubMed_bm25.json
+cache_step2_bioasq_scored_PubMed_Contriever.json
+```
+
 ### 7. Create Prompt Loads
 
 Run this in the base environment:
@@ -299,13 +341,17 @@ Run this in the base environment:
 ```shell
 cd /path/to/hpc/work/FRAG
 source .venv/bin/activate
-python llm_frag_evaluation/scripts/create_prompt_loads.py --all-input-files
+python llm_frag_evaluation/scripts/create_prompt_loads.py \
+  --config llm_frag_evaluation/configs/pubmed_config.json \
+  --all-input-files
 ```
 
 Validate the prompt loads:
 
 ```shell
-python llm_frag_evaluation/scripts/validate_prompt_loads.py --all-input-files
+python llm_frag_evaluation/scripts/validate_prompt_loads.py \
+  --config llm_frag_evaluation/configs/pubmed_config.json \
+  --all-input-files
 ```
 
 Expected result:
@@ -316,6 +362,12 @@ errors: 0
 
 With the default four datasets and two retrievers, this creates 20 prompt-load files: 4 zero-shot files under `bm25`, plus 16 RAG/FRAG files under `bm25` and `contriever`.
 
+For the PubMed campaign, the prompt loads are written under:
+
+```text
+llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/
+```
+
 ### 8. Run One Smoke Job
 
 Start with one small smoke run before submitting full jobs:
@@ -323,7 +375,7 @@ Start with one small smoke run before submitting full jobs:
 ```shell
 cd /path/to/hpc/work/FRAG
 bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load_smoke.sh \
-  llm_frag_evaluation/outputs/prompt_loads/medqa/bm25/zero_shot/Meta-Llama-3-70B-Instruct/prompts.jsonl
+  llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/medqa/bm25/zero_shot/Meta-Llama-3-70B-Instruct/prompts.jsonl
 ```
 
 Monitor:
@@ -346,14 +398,14 @@ Validate smoke predictions:
 ```shell
 source .venv/bin/activate
 python llm_frag_evaluation/scripts/validate_predictions.py \
-  --prompt-load llm_frag_evaluation/outputs/prompt_loads/medqa/bm25/zero_shot/Meta-Llama-3-70B-Instruct/prompts.jsonl
+  --prompt-load llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/medqa/bm25/zero_shot/Meta-Llama-3-70B-Instruct/prompts.jsonl
 ```
 
 For a smoke run, this validation will report missing predictions for records beyond the smoke limit. That is expected. Inspect the first generated `test_N.json` files manually:
 
 ```shell
-ls llm_frag_evaluation/outputs/predictions/medqa/bm25/zero_shot/Meta-Llama-3-70B-Instruct/test_*.json | head
-cat llm_frag_evaluation/outputs/predictions/medqa/bm25/zero_shot/Meta-Llama-3-70B-Instruct/test_0.json
+ls llm_frag_evaluation/outputs/predictions/source_collection_pubmed/medqa/bm25/zero_shot/Meta-Llama-3-70B-Instruct/test_*.json | head
+cat llm_frag_evaluation/outputs/predictions/source_collection_pubmed/medqa/bm25/zero_shot/Meta-Llama-3-70B-Instruct/test_0.json
 ```
 
 ### 9. Run A Full Prompt Load
@@ -363,13 +415,13 @@ Once the smoke run is clean:
 ```shell
 cd /path/to/hpc/work/FRAG
 bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
-  llm_frag_evaluation/outputs/prompt_loads/medqa/bm25/zero_shot/Meta-Llama-3-70B-Instruct/prompts.jsonl
+  llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/medqa/bm25/zero_shot/Meta-Llama-3-70B-Instruct/prompts.jsonl
 ```
 
 Repeat for each prompt load you want to run. Prompt loads are organized as:
 
 ```text
-llm_frag_evaluation/outputs/prompt_loads/<dataset>/<retriever>/<experiment>/Meta-Llama-3-70B-Instruct/prompts.jsonl
+llm_frag_evaluation/outputs/prompt_loads/<source_collection>/<dataset>/<retriever>/<experiment>/Meta-Llama-3-70B-Instruct/prompts.jsonl
 ```
 
 Do not submit `contriever/zero_shot`; zero-shot is not retriever-specific and is only generated under `bm25` by default.
@@ -378,13 +430,13 @@ Examples:
 
 ```shell
 bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
-  llm_frag_evaluation/outputs/prompt_loads/medqa/bm25/standard_rag/Meta-Llama-3-70B-Instruct/prompts.jsonl
+  llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/medqa/bm25/standard_rag/Meta-Llama-3-70B-Instruct/prompts.jsonl
 
 bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
-  llm_frag_evaluation/outputs/prompt_loads/medqa/bm25/frag/Meta-Llama-3-70B-Instruct/prompts.jsonl
+  llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/medqa/bm25/frag/Meta-Llama-3-70B-Instruct/prompts.jsonl
 
 bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
-  llm_frag_evaluation/outputs/prompt_loads/medqa/contriever/frag/Meta-Llama-3-70B-Instruct/prompts.jsonl
+  llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/medqa/contriever/frag/Meta-Llama-3-70B-Instruct/prompts.jsonl
 ```
 
 ### 10. Validate Full Predictions
@@ -394,7 +446,7 @@ After a full job finishes:
 ```shell
 source .venv/bin/activate
 python llm_frag_evaluation/scripts/validate_predictions.py \
-  --prompt-load llm_frag_evaluation/outputs/prompt_loads/medqa/bm25/zero_shot/Meta-Llama-3-70B-Instruct/prompts.jsonl
+  --prompt-load llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/medqa/bm25/zero_shot/Meta-Llama-3-70B-Instruct/prompts.jsonl
 ```
 
 Expected result:
@@ -410,7 +462,8 @@ Run metrics for one dataset/retriever/experiment/model output:
 ```shell
 source .venv/bin/activate
 python llm_frag_evaluation/scripts/evaluate_predictions.py \
-  --input-file cache_step2_medqa_scored_bm25.json \
+  --config llm_frag_evaluation/configs/pubmed_config.json \
+  --input-file source_collection_pubmed/cache_step2_medqa_scored_PubMed_bm25.json \
   --dataset medqa \
   --retriever bm25 \
   --experiment zero_shot \
@@ -442,7 +495,8 @@ Example:
 
 ```shell
 python llm_frag_evaluation/scripts/evaluate_predictions.py \
-  --input-file cache_step2_medqa_scored_bm25.json \
+  --config llm_frag_evaluation/configs/pubmed_config.json \
+  --input-file source_collection_pubmed/cache_step2_medqa_scored_PubMed_bm25.json \
   --dataset medqa \
   --retriever bm25 \
   --experiment frag \

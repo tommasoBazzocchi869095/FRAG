@@ -69,6 +69,47 @@ Approximate full-job wall times:
 
 The full campaign now has 20 jobs: 4 zero-shot jobs, 8 standard RAG jobs, and 8 FRAG jobs. Zero-shot is not retriever-specific and should only be run once per dataset using the `bm25/zero_shot` prompt loads.
 
+The completed campaign used Wikipedia as the retrieval resource. Its Step 2 inputs live under `llm_frag_evaluation/data/inputs/source_collection_wiki/`. For PubMed-backed retrieval runs, use the corresponding files under `llm_frag_evaluation/data/inputs/source_collection_pubmed/`.
+
+## PubMed Resource Campaign
+
+For the new PubMed-backed generation campaign, create a separate prompt-load tree from the PubMed collection:
+
+```bash
+python llm_frag_evaluation/scripts/create_prompt_loads.py \
+  --config llm_frag_evaluation/configs/pubmed_config.json \
+  --all-input-files
+```
+
+Validate it before submitting jobs:
+
+```bash
+python llm_frag_evaluation/scripts/validate_prompt_loads.py \
+  --config llm_frag_evaluation/configs/pubmed_config.json \
+  --all-input-files
+```
+
+The PubMed prompt loads are written under:
+
+```text
+llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/
+```
+
+Prediction files generated from those prompt loads are written under:
+
+```text
+llm_frag_evaluation/outputs/predictions/source_collection_pubmed/
+```
+
+Submit the PubMed prompt loads using the collection-qualified path, for example:
+
+```bash
+bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
+  llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/medqa/bm25/zero_shot/Meta-Llama-3-70B-Instruct/prompts.jsonl
+```
+
+As before, do not submit `contriever/zero_shot`; zero-shot is not retriever-specific and is generated only under `bm25`.
+
 All jobs request 4 GPUs. Running two jobs in parallel requests 8 GPUs.
 
 ## Two-At-A-Time Schedule
@@ -79,16 +120,16 @@ If running two jobs at a time, use this cadence. The check-back time is when it 
 |--------------:|---|---:|
 | 1 (Completed) | `medqa/bm25/zero_shot` + `mmlu/bm25/zero_shot` | ~2h |
 | 2 (Completed) | `bioasq/bm25/zero_shot` + `pubmedqa/bm25/zero_shot` | ~1h |
-| 3 (MedQA submitted, MMLU remaining) | `medqa/bm25/standard_rag` + `mmlu/bm25/standard_rag` | ~2.5h |
+| 3 (Completed) | `medqa/bm25/standard_rag` + `mmlu/bm25/standard_rag` | ~2.5h |
 | 4 (Completed) | `bioasq/bm25/standard_rag` + `pubmedqa/bm25/standard_rag` | ~1.5h |
-| 5 (MedQA submitted, MMLU remaining) | `medqa/contriever/standard_rag` + `mmlu/contriever/standard_rag` | ~2.5h |
+| 5 (Completed) | `medqa/contriever/standard_rag` + `mmlu/contriever/standard_rag` | ~2.5h |
 | 6 (Completed) | `bioasq/contriever/standard_rag` + `pubmedqa/contriever/standard_rag` | ~1.5h |
-| 7 (MedQA submitted, MMLU remaining) | `medqa/bm25/frag` + `mmlu/bm25/frag` | ~2.5h |
+| 7 (Completed) | `medqa/bm25/frag` + `mmlu/bm25/frag` | ~2.5h |
 | 8 (Completed) | `bioasq/bm25/frag` + `pubmedqa/bm25/frag` | ~1.5h |
-| 9 (MedQA submitted, MMLU remaining) | `medqa/contriever/frag` + `mmlu/contriever/frag` | ~2.5h |
+| 9 (Completed) | `medqa/contriever/frag` + `mmlu/contriever/frag` | ~2.5h |
 | 10 (Completed) | `bioasq/contriever/frag` + `pubmedqa/contriever/frag` | ~1.5h |
 
-Current deviation from the pair schedule: PubMedQA and BioASQ RAG/FRAG blocks were run as four-job batches and completed; the four MedQA RAG/FRAG jobs are now submitted together. After MedQA finishes, the last remaining block is MMLU RAG/FRAG.
+Current deviation from the pair schedule: PubMedQA and BioASQ RAG/FRAG blocks were run as four-job batches. The MedQA and MMLU RAG/FRAG blocks are also complete. All 20 planned full-generation jobs are complete.
 
 ## Current Job Status
 
@@ -108,26 +149,18 @@ Completed:
 | bioasq | bm25 | frag | Completed, metrics recorded |
 | bioasq | contriever | standard_rag | Completed, metrics recorded |
 | bioasq | contriever | frag | Completed, metrics recorded |
+| medqa | bm25 | standard_rag | Completed, metrics recorded |
+| medqa | bm25 | frag | Completed, metrics recorded |
+| medqa | contriever | standard_rag | Completed, metrics recorded |
+| medqa | contriever | frag | Completed, metrics recorded |
+| mmlu | bm25 | standard_rag | Completed, metrics recorded |
+| mmlu | bm25 | frag | Completed, metrics recorded |
+| mmlu | contriever | standard_rag | Completed, metrics recorded |
+| mmlu | contriever | frag | Completed, metrics recorded |
 
-Submitted:
+No planned CINECA generation jobs remain.
 
-| Job ID | Dataset | Retriever | Experiment | SLURM State |
-|---:|---|---|---|---|
-| 41004143 | medqa | bm25 | standard_rag | Running at last check |
-| 41004148 | medqa | bm25 | frag | Running at last check |
-| 41004156 | medqa | contriever | standard_rag | Pending at last check |
-| 41004162 | medqa | contriever | frag | Pending at last check |
-
-Last remaining block after MedQA:
-
-| Dataset | Retriever | Experiment |
-|---|---|---|
-| mmlu | bm25 | standard_rag |
-| mmlu | bm25 | frag |
-| mmlu | contriever | standard_rag |
-| mmlu | contriever | frag |
-
-The exact prompt-load path appears in each job's `.out` file at completion. Before completion, use `scontrol show job <JOBID>` to inspect the exported `PROMPT_LOAD_PATH` if available.
+The exact prompt-load path appears in each job's `.out` file. For completed jobs, inspect the corresponding `frag-vllm_<JOBID>.out` log if the prompt-load path is needed later.
 
 ## Submit Zero-Shot Jobs
 
@@ -267,25 +300,27 @@ Example:
 
 ```bash
 python llm_frag_evaluation/scripts/evaluate_predictions.py \
-  --input-file cache_step2_medqa_scored_bm25.json \
+  --input-file source_collection_wiki/cache_step2_medqa_scored_bm25.json \
   --dataset medqa \
   --retriever bm25 \
   --experiment zero_shot \
   --llm Meta-Llama-3-70B-Instruct
 ```
 
-Use the matching input file for each dataset/retriever:
+Use the matching input file for each dataset/retriever. For the completed Wikipedia-resource experiments, use `source_collection_wiki`:
 
 | Dataset | Retriever | Input file |
 |---|---|---|
-| medqa | bm25 | `cache_step2_medqa_scored_bm25.json` |
-| medqa | contriever | `cache_step2_medqa_scored_contriever.json` |
-| mmlu | bm25 | `cache_step2_mmlu_scored_bm25.json` |
-| mmlu | contriever | `cache_step2_mmlu_scored_contriever.json` |
-| pubmedqa | bm25 | `cache_step2_pubmedqa_scored_bm25.json` |
-| pubmedqa | contriever | `cache_step2_pubmedqa_scored_contriever.json` |
-| bioasq | bm25 | `cache_step2_bioasq_scored_bm25 (1).json` |
-| bioasq | contriever | `cache_step2_bioasq_scored_contriever (1).json` |
+| medqa | bm25 | `source_collection_wiki/cache_step2_medqa_scored_bm25.json` |
+| medqa | contriever | `source_collection_wiki/cache_step2_medqa_scored_contriever.json` |
+| mmlu | bm25 | `source_collection_wiki/cache_step2_mmlu_scored_bm25.json` |
+| mmlu | contriever | `source_collection_wiki/cache_step2_mmlu_scored_contriever.json` |
+| pubmedqa | bm25 | `source_collection_wiki/cache_step2_pubmedqa_scored_bm25.json` |
+| pubmedqa | contriever | `source_collection_wiki/cache_step2_pubmedqa_scored_contriever.json` |
+| bioasq | bm25 | `source_collection_wiki/cache_step2_bioasq_scored_bm25 (1).json` |
+| bioasq | contriever | `source_collection_wiki/cache_step2_bioasq_scored_contriever (1).json` |
+
+For PubMed-resource experiments, use the matching files in `source_collection_pubmed`, for example `source_collection_pubmed/cache_step2_medqa_scored_PubMed_bm25.json` and `source_collection_pubmed/cache_step2_medqa_scored_PubMed_Contriever.json`.
 
 ## Failure Handling
 

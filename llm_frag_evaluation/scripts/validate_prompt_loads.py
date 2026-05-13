@@ -31,9 +31,10 @@ REQUIRED_RECORD_FIELDS = {
 def parse_args():
     parser = argparse.ArgumentParser(description="Validate generated prompt loads.")
     parser.add_argument("--config", default="llm_frag_evaluation/configs/default_config.json")
-    parser.add_argument("--prompt-load-dir", default="llm_frag_evaluation/outputs/prompt_loads")
+    parser.add_argument("--prompt-load-dir", default=None)
     parser.add_argument("--input-file", action="append", default=None, help="Input JSON filename relative to input_dir. Can be repeated.")
-    parser.add_argument("--all-input-files", action="store_true", help="Validate all cache_step2*.json inputs.")
+    parser.add_argument("--all-input-files", action="store_true", help="Validate all cache_step2*.json inputs in the configured input directory or collection.")
+    parser.add_argument("--input-collection", default=None, help="Optional subdirectory under input_dir, for example source_collection_pubmed.")
     parser.add_argument("--strict-frag-order", action="store_true", help="Recompute FRAG order and require exact selected id order.")
     return parser.parse_args()
 
@@ -69,8 +70,10 @@ def selected_ids_from_question(question, experiment, top_k, alpha, normalize_top
 
 def get_input_files(input_dir, args, config):
     input_dir = Path(input_dir)
+    input_collection = args.input_collection or config.get("input_collection")
+    search_dir = input_dir / input_collection if input_collection else input_dir
     if args.all_input_files:
-        return [path.name for path in sorted(input_dir.glob("cache_step2*.json"))]
+        return [path.relative_to(input_dir).as_posix() for path in sorted(search_dir.glob("cache_step2*.json"))]
     if args.input_file:
         return args.input_file
     return config.get("input_files")
@@ -189,7 +192,8 @@ def main():
     args = parse_args()
     config = load_json(args.config)
     input_dir = resolve_repo_path(config["input_dir"])
-    prompt_load_root = resolve_repo_path(args.prompt_load_dir)
+    prompt_load_dir = args.prompt_load_dir or config.get("prompt_load_output_dir", "llm_frag_evaluation/outputs/prompt_loads")
+    prompt_load_root = resolve_repo_path(prompt_load_dir)
     input_files = get_input_files(input_dir, args, config)
 
     if not input_files:
