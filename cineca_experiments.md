@@ -3,7 +3,7 @@
 Run from the repository root:
 
 ```bash
-cd /leonardo_work/IscrC_SpecDLM/FRAG
+cd /path/to/hpc/work/FRAG
 source .venv_frag/bin/activate
 ```
 

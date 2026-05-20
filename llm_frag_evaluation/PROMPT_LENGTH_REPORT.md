@@ -4,14 +4,14 @@ Generated on CINECA with:
 
 ```bash
 python llm_frag_evaluation/scripts/report_prompt_lengths.py \
-  --model-path /leonardo_work/IscrC_SpecDLM/models/Llama-3.1-70B-Instruct \
+  --model-path /path/to/hpc/work/models/Meta-Llama-3-70B-Instruct \
   --fail-over 12288
 ```
 
 Tokenizer/model:
 
 ```text
-/leonardo_work/IscrC_SpecDLM/models/Llama-3.1-70B-Instruct
+/path/to/hpc/work/models/Meta-Llama-3-70B-Instruct
 ```
 
 ## Summary

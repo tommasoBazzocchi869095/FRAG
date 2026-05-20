@@ -1,6 +1,6 @@
-# CINECA `llm_frag_evaluation` Completion Notes
+# CINECA `llm_frag_evaluation` Next Steps
 
-Current state as of May 7, 2026:
+Current state as of May 13, 2026:
 
 - Prompt code is aligned with previous MedRAG templates and pushed to GitHub.
 - The completed experiments used Wikipedia as the retrieval resource, so their Step 2 inputs are the files under `llm_frag_evaluation/data/inputs/source_collection_wiki/`.
@@ -10,9 +10,161 @@ Current state as of May 7, 2026:
 - RAG/FRAG require `GENERATE_MAX_MODEL_LEN=12288`.
 - Prompt length report shows 0 prompts over 12288 tokens; max prompt is 11025 tokens.
 - The vLLM runner logs individual prompt errors and continues instead of aborting the whole job.
-- All 20 planned full-generation jobs are complete and all metrics have been recorded in `llm_frag_evaluation/RESULTS_TABLE.md`.
+- The PubMed-resource campaign has started. MedQA was the first PubMed dataset run.
+- Next: validate and evaluate the PubMed MedQA outputs, then run the remaining PubMed datasets: BioASQ, MMLU, and PubMedQA.
 
-## Completed Experiments
+## PubMed Campaign Status
+
+| Dataset | Status | Next action |
+|---|---|---|
+| medqa | Generation submitted/run first | Validate predictions, compute metrics, record results |
+| bioasq | Not run yet for PubMed resource | Submit 5 prompt-load jobs |
+| mmlu | Not run yet for PubMed resource | Submit 5 prompt-load jobs |
+| pubmedqa | Not run yet for PubMed resource | Submit 5 prompt-load jobs |
+
+All PubMed prompt loads are under:
+
+```text
+llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/
+```
+
+All PubMed predictions are expected under:
+
+```text
+llm_frag_evaluation/outputs/predictions/source_collection_pubmed/
+```
+
+## Validate PubMed MedQA
+
+Run these after the MedQA PubMed generation jobs finish:
+
+```bash
+source .venv_frag/bin/activate
+
+python llm_frag_evaluation/scripts/validate_predictions.py \
+  --prompt-load llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/medqa/bm25/zero_shot/Meta-Llama-3-70B-Instruct/prompts.jsonl
+
+python llm_frag_evaluation/scripts/validate_predictions.py \
+  --prompt-load llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/medqa/bm25/standard_rag/Meta-Llama-3-70B-Instruct/prompts.jsonl
+
+python llm_frag_evaluation/scripts/validate_predictions.py \
+  --prompt-load llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/medqa/bm25/frag/Meta-Llama-3-70B-Instruct/prompts.jsonl
+
+python llm_frag_evaluation/scripts/validate_predictions.py \
+  --prompt-load llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/medqa/contriever/standard_rag/Meta-Llama-3-70B-Instruct/prompts.jsonl
+
+python llm_frag_evaluation/scripts/validate_predictions.py \
+  --prompt-load llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/medqa/contriever/frag/Meta-Llama-3-70B-Instruct/prompts.jsonl
+```
+
+Expected full-run result for each validation:
+
+```text
+errors: 0
+```
+
+## Evaluate PubMed MedQA
+
+```bash
+source .venv_frag/bin/activate
+
+python llm_frag_evaluation/scripts/evaluate_predictions.py \
+  --config llm_frag_evaluation/configs/pubmed_config.json \
+  --input-file source_collection_pubmed/cache_step2_medqa_scored_PubMed_bm25.json \
+  --dataset medqa --retriever bm25 --experiment zero_shot \
+  --llm Meta-Llama-3-70B-Instruct
+
+python llm_frag_evaluation/scripts/evaluate_predictions.py \
+  --config llm_frag_evaluation/configs/pubmed_config.json \
+  --input-file source_collection_pubmed/cache_step2_medqa_scored_PubMed_bm25.json \
+  --dataset medqa --retriever bm25 --experiment standard_rag \
+  --llm Meta-Llama-3-70B-Instruct
+
+python llm_frag_evaluation/scripts/evaluate_predictions.py \
+  --config llm_frag_evaluation/configs/pubmed_config.json \
+  --input-file source_collection_pubmed/cache_step2_medqa_scored_PubMed_bm25.json \
+  --dataset medqa --retriever bm25 --experiment frag \
+  --llm Meta-Llama-3-70B-Instruct
+
+python llm_frag_evaluation/scripts/evaluate_predictions.py \
+  --config llm_frag_evaluation/configs/pubmed_config.json \
+  --input-file source_collection_pubmed/cache_step2_medqa_scored_PubMed_Contriever.json \
+  --dataset medqa --retriever contriever --experiment standard_rag \
+  --llm Meta-Llama-3-70B-Instruct
+
+python llm_frag_evaluation/scripts/evaluate_predictions.py \
+  --config llm_frag_evaluation/configs/pubmed_config.json \
+  --input-file source_collection_pubmed/cache_step2_medqa_scored_PubMed_Contriever.json \
+  --dataset medqa --retriever contriever --experiment frag \
+  --llm Meta-Llama-3-70B-Instruct
+```
+
+## Submit Remaining PubMed Datasets
+
+Submit one dataset at a time, keeping the same 5-job pattern: `bm25/zero_shot`, `bm25/standard_rag`, `bm25/frag`, `contriever/standard_rag`, `contriever/frag`.
+
+### BioASQ
+
+```bash
+bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
+  llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/bioasq/bm25/zero_shot/Meta-Llama-3-70B-Instruct/prompts.jsonl
+
+bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
+  llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/bioasq/bm25/standard_rag/Meta-Llama-3-70B-Instruct/prompts.jsonl
+
+bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
+  llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/bioasq/bm25/frag/Meta-Llama-3-70B-Instruct/prompts.jsonl
+
+bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
+  llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/bioasq/contriever/standard_rag/Meta-Llama-3-70B-Instruct/prompts.jsonl
+
+bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
+  llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/bioasq/contriever/frag/Meta-Llama-3-70B-Instruct/prompts.jsonl
+```
+
+### MMLU
+
+```bash
+bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
+  llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/mmlu/bm25/zero_shot/Meta-Llama-3-70B-Instruct/prompts.jsonl
+
+bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
+  llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/mmlu/bm25/standard_rag/Meta-Llama-3-70B-Instruct/prompts.jsonl
+
+bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
+  llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/mmlu/bm25/frag/Meta-Llama-3-70B-Instruct/prompts.jsonl
+
+bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
+  llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/mmlu/contriever/standard_rag/Meta-Llama-3-70B-Instruct/prompts.jsonl
+
+bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
+  llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/mmlu/contriever/frag/Meta-Llama-3-70B-Instruct/prompts.jsonl
+```
+
+### PubMedQA
+
+```bash
+bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
+  llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/pubmedqa/bm25/zero_shot/Meta-Llama-3-70B-Instruct/prompts.jsonl
+
+bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
+  llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/pubmedqa/bm25/standard_rag/Meta-Llama-3-70B-Instruct/prompts.jsonl
+
+bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
+  llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/pubmedqa/bm25/frag/Meta-Llama-3-70B-Instruct/prompts.jsonl
+
+bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
+  llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/pubmedqa/contriever/standard_rag/Meta-Llama-3-70B-Instruct/prompts.jsonl
+
+bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load.sh \
+  llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/pubmedqa/contriever/frag/Meta-Llama-3-70B-Instruct/prompts.jsonl
+```
+
+## Previous Wikipedia Campaign
+
+All 20 planned Wikipedia-resource generation jobs are complete and all metrics have been recorded in `llm_frag_evaluation/RESULTS_TABLE.md`.
+
+### Completed Experiments
 
 | Dataset | Retriever | Experiment | Notes |
 |---|---|---|---|
@@ -37,7 +189,7 @@ Current state as of May 7, 2026:
 | mmlu | contriever | standard_rag | Completed, metrics recorded |
 | mmlu | contriever | frag | Completed, metrics recorded |
 
-## Last Metric Commands
+### Last Wikipedia Metric Commands
 
 ```bash
 source .venv_frag/bin/activate

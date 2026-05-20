@@ -1,0 +1,14 @@
+# Local sanitization and private environment files
+.local/
+sanitize-report*.json
+sanitize-report*.md
+
+# Python cache
+__pycache__/
+*.pyc
+
+# IDE metadata
+.idea/
+
+# Generated retrieval caches
+llm_frag_evaluation/data/inputs/source_collection_*/cache_step2*.json

@@ -211,7 +211,7 @@ First clone the repository if it is not already present:
 
 ```shell
 cd /path/to/hpc/work
-git clone https://github.com/tommasoBazzocchi869095/FRAG.git
+git clone https://github.com/<your-org-or-user>/FRAG.git
 cd FRAG
 ```
 
