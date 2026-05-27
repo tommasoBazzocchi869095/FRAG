@@ -2,23 +2,96 @@
 
 ## Scope
 
-The filled results below are for the completed Wikipedia-resource campaign. PubMed-resource results are not finalized yet and should not be mixed into this table until prediction validation and metric computation are complete.
+The filled Wikipedia-resource results are kept separate from PubMed-resource results. PubMed rows should be added only after prediction validation and metric computation are complete for each run.
 
 Current PubMed-resource state as of May 27, 2026:
 
 | Dataset | Retriever | Experiment | Status |
 |---|---|---|---|
-| BioASQ | BM25 | zero_shot | Complete; metrics pending |
+| BioASQ | BM25 | zero_shot | Complete; metrics recorded |
 | MedQA | BM25 | zero_shot | Complete; metrics pending |
 | MedQA | BM25 | standard_rag | First run incomplete at `GENERATE_MAX_MODEL_LEN=12288`; rerun submitted with measured context setting |
 | MedQA | BM25 | frag | First run incomplete at `GENERATE_MAX_MODEL_LEN=12288`; rerun submitted with measured context setting |
 | MedQA | Contriever | standard_rag | First run incomplete at `GENERATE_MAX_MODEL_LEN=12288`; rerun submitted with measured context setting |
 | MedQA | Contriever | frag | First run incomplete at `GENERATE_MAX_MODEL_LEN=12288`; rerun submitted with measured context setting |
-| BioASQ | BM25/Contriever | RAG/FRAG | Submitted; metrics pending |
+| BioASQ | BM25/Contriever | RAG/FRAG | Complete; metrics recorded |
 | MMLU | BM25/Contriever | zero_shot/RAG/FRAG | Not run or not located |
 | PubMedQA | BM25/Contriever | zero_shot/RAG/FRAG | Not run or not located |
 
-The current measured PubMed MedQA Contriever FRAG context recommendation is `GENERATE_MAX_MODEL_LEN=22528`, based on a 20280-token max prompt, 1024 generation tokens, and a 512-token buffer. Add PubMed metric rows only after full reruns are complete and validated.
+The current measured PubMed MedQA Contriever FRAG context recommendation is `GENERATE_MAX_MODEL_LEN=22528`, based on a 20280-token max prompt, 1024 generation tokens, and a 512-token buffer. Add remaining PubMed metric rows only after full reruns are complete and validated.
+
+## PubMed-Resource Results
+
+Current filled PubMed-resource result:
+
+- BioASQ / BM25 / zero-shot / Llama-3.1-70B-Instruct
+- `n = 618`
+- `missing_predictions = 0`
+- Accuracy: `0.8317152103559871`
+- Precision macro: `0.8490629136765833`
+- Recall macro: `0.7843900777657944`
+- F1 macro: `0.8018278018278018`
+- BioASQ / BM25 / standard_rag / Llama-3.1-70B-Instruct
+- `n = 618`
+- `missing_predictions = 0`
+- Accuracy: `0.9239482200647249`
+- Precision macro: `0.9218328840970351`
+- Recall macro: `0.9121927683487541`
+- F1 macro: `0.9166386844031168`
+- BioASQ / BM25 / frag / Llama-3.1-70B-Instruct
+- `n = 618`
+- `missing_predictions = 0`
+- Accuracy: `0.9239482200647249`
+- Precision macro: `0.9227591036414566`
+- Recall macro: `0.9112164386671964`
+- F1 macro: `0.9164622273863312`
+- BioASQ / Contriever / standard_rag / Llama-3.1-70B-Instruct
+- `n = 618`
+- `missing_predictions = 0`
+- Accuracy: `0.8996763754045307`
+- Precision macro: `0.8961289643312549`
+- Recall macro: `0.8844184594425839`
+- F1 macro: `0.8896835268103924`
+- BioASQ / Contriever / frag / Llama-3.1-70B-Instruct
+- `n = 618`
+- `missing_predictions = 0`
+- Accuracy: `0.8980582524271845`
+- Precision macro: `0.8956310679611651`
+- Recall macro: `0.8811999772946586`
+- F1 macro: `0.887539969324356`
+
+Values in the PubMed-resource table are reported as percentages.
+
+```latex
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccc}
+\toprule
+& \multicolumn{4}{c}{BioASQ} \\
+\cmidrule(lr){2-5}
+\textbf{Llama-3.1-70B-Instruct}
+& P & R & F1 & Acc \\
+\midrule
+Zero-shot
+& 84.91 & 78.44 & 80.18 & 83.17 \\
+BM25 RAG
+& 92.18 & 91.22 & 91.66 & 92.39 \\
+BM25 FRAG
+& 92.28 & 91.12 & 91.65 & 92.39 \\
+Contriever RAG
+& 89.61 & 88.44 & 88.97 & 89.97 \\
+Contriever FRAG
+& 89.56 & 88.12 & 88.75 & 89.81 \\
+\bottomrule
+\end{tabular}
+\caption{PubMed-resource evaluation results for Llama-3.1-70B-Instruct on BioASQ. We report macro precision (P), macro recall (R), macro F1 (F1), and accuracy (Acc) for zero-shot prompting, standard retrieval-augmented generation (RAG), and factuality-aware retrieval-augmented generation (FRAG). RAG and FRAG are evaluated with BM25 and Contriever retrieval over PubMed passages.}
+\label{tab:llama31_70b_pubmed_bioasq_results}
+\end{table*}
+```
+
+## Wikipedia-Resource Results
 
 Current filled result:
 
