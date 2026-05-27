@@ -1,5 +1,47 @@
 # Prompt Length Report
 
+## Current Interpretation
+
+This report originally described the completed Wikipedia-resource prompt loads. Its conclusion that `GENERATE_MAX_MODEL_LEN=12288` is enough applies to those checked Wikipedia prompt loads, not to PubMed-backed RAG/FRAG prompt loads.
+
+For PubMed-backed runs, tokenize the collection-qualified prompt loads under:
+
+```text
+llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/
+```
+
+before generation. PubMed passages are longer, and context requirements vary by dataset, retriever, and experiment.
+
+The first measured PubMed failure was `medqa/contriever/frag` at `GENERATE_MAX_MODEL_LEN=12288`:
+
+| Field | Value |
+|---|---:|
+| Prompt count | 1273 |
+| Parsed predictions at 12288 | 866 |
+| `PromptTooLong` records | 406 |
+| Invalid answers | 1 |
+| Max prompt tokens | 20280 |
+| Average prompt tokens | 11149.69 |
+| Prompts over 12288 | 406 |
+| Prompts over 16384 | 90 |
+| Prompts over 24576 | 0 |
+
+With `GENERATE_MAX_TOKENS=1024` and a 512-token safety buffer:
+
+```text
+20280 + 1024 + 512 = 21816
+```
+
+Rounded up to the next 1024-token multiple, the current recommendation for PubMed MedQA Contriever FRAG is:
+
+```bash
+export GENERATE_MAX_MODEL_LEN="22528"
+```
+
+A longest-prompt smoke load with 7 records completed successfully with `GENERATE_MAX_MODEL_LEN=22528`, `GENERATE_BATCH_SIZE=1`, and `GENERATE_GPU_MEMORY_UTILIZATION=0.90`.
+
+Use `llm_frag_evaluation/tests/diagnostics/diagnose_vllm_run.py` for per-run recommendations and `llm_frag_evaluation/scripts/report_prompt_lengths.py` for all prompt-load scans.
+
 Generated on CINECA with:
 
 ```bash
@@ -14,7 +56,7 @@ Tokenizer/model:
 /path/to/hpc/work/models/Meta-Llama-3-70B-Instruct
 ```
 
-## Summary
+## Wikipedia Prompt-Load Summary
 
 - Prompt loads checked after zero-shot deduplication: 20
 - Historical CINECA report included 24 prompt loads because zero-shot had also been generated under `contriever`. Zero-shot is not retriever-specific, so the current code keeps only the `bm25/zero_shot` prompt loads.
@@ -24,7 +66,7 @@ Tokenizer/model:
 - Longest prompt: `medqa_contriever_standard_rag_41` / `test_41.json`
 - Longest prompt load: `medqa/contriever/standard_rag`
 
-Conclusion: use `GENERATE_MAX_MODEL_LEN=12288` for full RAG and FRAG runs. This covers all generated prompt loads with margin. Zero-shot prompts are much shorter and also fit comfortably.
+Conclusion for the checked Wikipedia prompt loads: use `GENERATE_MAX_MODEL_LEN=12288` for full RAG and FRAG runs. This covers the checked generated prompt loads with margin. Zero-shot prompts are much shorter and also fit comfortably. Do not reuse this conclusion for PubMed-backed runs without running the PubMed prompt-length diagnostics above.
 
 ## Overall Maximum
 
@@ -70,6 +112,7 @@ Conclusion: use `GENERATE_MAX_MODEL_LEN=12288` for full RAG and FRAG runs. This 
 
 - `GENERATE_MAX_MODEL_LEN=4096` is not enough for any RAG/FRAG prompt load.
 - `GENERATE_MAX_MODEL_LEN=8192` is not enough for some MedQA, MMLU, and BioASQ prompt loads.
-- `GENERATE_MAX_MODEL_LEN=12288` is enough for all checked prompt loads.
-- With `GENERATE_MAX_TOKENS=1024`, the longest observed prompt plus maximum generation budget is approximately 12049 tokens, still within 12288.
+- `GENERATE_MAX_MODEL_LEN=12288` is enough for the checked Wikipedia prompt loads.
+- PubMed-backed prompt loads require separate sizing; at least PubMed MedQA Contriever FRAG requires `GENERATE_MAX_MODEL_LEN=22528` with the current 1024-token generation budget and 512-token buffer.
+- For the checked Wikipedia prompt loads, with `GENERATE_MAX_TOKENS=1024`, the longest observed prompt plus maximum generation budget is approximately 12049 tokens, still within 12288.
 - The updated vLLM runner preflights prompt length and logs oversized prompts to `generation_errors.jsonl` instead of aborting the whole job.

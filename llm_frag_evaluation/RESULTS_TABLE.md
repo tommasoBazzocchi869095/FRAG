@@ -1,5 +1,25 @@
 # Llama 3.1 70B Results Table
 
+## Scope
+
+The filled results below are for the completed Wikipedia-resource campaign. PubMed-resource results are not finalized yet and should not be mixed into this table until prediction validation and metric computation are complete.
+
+Current PubMed-resource state as of May 27, 2026:
+
+| Dataset | Retriever | Experiment | Status |
+|---|---|---|---|
+| BioASQ | BM25 | zero_shot | Complete; metrics pending |
+| MedQA | BM25 | zero_shot | Complete; metrics pending |
+| MedQA | BM25 | standard_rag | First run incomplete at `GENERATE_MAX_MODEL_LEN=12288`; rerun submitted with measured context setting |
+| MedQA | BM25 | frag | First run incomplete at `GENERATE_MAX_MODEL_LEN=12288`; rerun submitted with measured context setting |
+| MedQA | Contriever | standard_rag | First run incomplete at `GENERATE_MAX_MODEL_LEN=12288`; rerun submitted with measured context setting |
+| MedQA | Contriever | frag | First run incomplete at `GENERATE_MAX_MODEL_LEN=12288`; rerun submitted with measured context setting |
+| BioASQ | BM25/Contriever | RAG/FRAG | Not run or not located |
+| MMLU | BM25/Contriever | zero_shot/RAG/FRAG | Not run or not located |
+| PubMedQA | BM25/Contriever | zero_shot/RAG/FRAG | Not run or not located |
+
+The current measured PubMed MedQA Contriever FRAG context recommendation is `GENERATE_MAX_MODEL_LEN=22528`, based on a 20280-token max prompt, 1024 generation tokens, and a 512-token buffer. Add PubMed metric rows only after full reruns are complete and validated.
+
 Current filled result:
 
 - MMLU / BM25 / zero-shot / Llama-3.1-70B-Instruct

@@ -1,26 +1,30 @@
 # CINECA `llm_frag_evaluation` Next Steps
 
-Current state as of May 13, 2026:
+Current state as of May 27, 2026:
 
 - Prompt code is aligned with previous MedRAG templates and pushed to GitHub.
 - The completed experiments used Wikipedia as the retrieval resource, so their Step 2 inputs are the files under `llm_frag_evaluation/data/inputs/source_collection_wiki/`.
 - PubMed-backed reruns should use `llm_frag_evaluation/configs/pubmed_config.json`, which selects the matching files under `llm_frag_evaluation/data/inputs/source_collection_pubmed/` and writes collection-qualified prompt loads/predictions.
 - Zero-shot is not retriever-specific; run it only once per dataset using `bm25/zero_shot`.
 - Prompt loads should now be 20 files after regeneration, not 24.
-- RAG/FRAG require `GENERATE_MAX_MODEL_LEN=12288`.
-- Prompt length report shows 0 prompts over 12288 tokens; max prompt is 11025 tokens.
+- The earlier Wikipedia prompt length report showed 0 prompts over 12288 tokens; that finding does not apply to PubMed-backed RAG/FRAG prompt loads.
+- PubMed-backed prompt loads must be tokenized before full generation. Use `llm_frag_evaluation/scripts/report_prompt_lengths.py` for all prompt loads and `llm_frag_evaluation/tests/diagnostics/diagnose_vllm_run.py` for failed or smoke runs.
+- PubMed MedQA Contriever FRAG at `GENERATE_MAX_MODEL_LEN=12288` produced 406 `PromptTooLong` records and 1 invalid answer. The longest prompt was 20280 tokens.
+- With `GENERATE_MAX_TOKENS=1024` and a 512-token safety buffer, the measured recommendation for PubMed MedQA Contriever FRAG is `GENERATE_MAX_MODEL_LEN=22528`.
+- A longest-prompt smoke run for PubMed MedQA Contriever FRAG completed 7/7 predictions with `GENERATE_MAX_MODEL_LEN=22528`, `GENERATE_BATCH_SIZE=1`, and `GENERATE_GPU_MEMORY_UTILIZATION=0.90`.
 - The vLLM runner logs individual prompt errors and continues instead of aborting the whole job.
 - The PubMed-resource campaign has started. MedQA was the first PubMed dataset run.
-- Next: validate and evaluate the PubMed MedQA outputs, then run the remaining PubMed datasets: BioASQ, MMLU, and PubMedQA.
+- The incomplete MedQA RAG/FRAG prediction leaf folders were removed and the four MedQA RAG/FRAG jobs were relaunched concurrently with the larger context setting.
+- Next: monitor the four MedQA RAG/FRAG reruns, validate/evaluate them after completion, then run the remaining PubMed datasets: BioASQ, MMLU, and PubMedQA.
 
 ## PubMed Campaign Status
 
 | Dataset | Status | Next action |
 |---|---|---|
-| medqa | Generation submitted/run first | Validate predictions, compute metrics, record results |
-| bioasq | Not run yet for PubMed resource | Submit 5 prompt-load jobs |
-| mmlu | Not run yet for PubMed resource | Submit 5 prompt-load jobs |
-| pubmedqa | Not run yet for PubMed resource | Submit 5 prompt-load jobs |
+| medqa | Zero-shot complete; first RAG/FRAG attempt incomplete at 12288; four RAG/FRAG reruns submitted at 22528 | Monitor reruns, validate predictions, compute metrics, record results |
+| bioasq | `bm25/zero_shot` complete; RAG/FRAG not run or not located | Run RAG/FRAG after prompt length sizing |
+| mmlu | Not run yet for PubMed resource | Run 5 prompt-load jobs after prompt length sizing |
+| pubmedqa | Not run yet for PubMed resource | Run 5 prompt-load jobs after prompt length sizing |
 
 All PubMed prompt loads are under:
 
@@ -33,6 +37,46 @@ All PubMed predictions are expected under:
 ```text
 llm_frag_evaluation/outputs/predictions/source_collection_pubmed/
 ```
+
+## PubMed Context Sizing
+
+Do not assume the Wikipedia `12288` context setting is sufficient for PubMed-backed RAG/FRAG prompt loads. PubMed passages are longer, and context requirements vary by dataset, retriever, and experiment.
+
+Inspect all PubMed prompt loads before full generation:
+
+```bash
+python llm_frag_evaluation/scripts/report_prompt_lengths.py \
+  --prompt-load-dir llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed \
+  --model-path /leonardo_work/IscrC_SpecDLM/models/Llama-3.1-70B-Instruct \
+  --threshold 12288 \
+  --threshold 16384 \
+  --threshold 20480 \
+  --threshold 22528 \
+  --threshold 24576 \
+  --threshold 32768
+```
+
+For a specific failed or smoke run, generate a diagnostic report with a recommended `GENERATE_MAX_MODEL_LEN`:
+
+```bash
+python llm_frag_evaluation/tests/diagnostics/diagnose_vllm_run.py \
+  --summary llm_frag_evaluation/outputs/predictions/source_collection_pubmed/medqa/contriever/frag/Meta-Llama-3-70B-Instruct/run_summary.json \
+  --errors llm_frag_evaluation/outputs/predictions/source_collection_pubmed/medqa/contriever/frag/Meta-Llama-3-70B-Instruct/generation_errors.jsonl \
+  --prompt-load llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/medqa/contriever/frag/Meta-Llama-3-70B-Instruct/prompts.jsonl \
+  --model-path /leonardo_work/IscrC_SpecDLM/models/Llama-3.1-70B-Instruct \
+  --run-name pubmed_medqa_contriever_frag_12288 \
+  --context-buffer-tokens 512
+```
+
+Current measured MedQA Contriever FRAG recommendation:
+
+```bash
+export GENERATE_MAX_MODEL_LEN="22528"
+export GENERATE_BATCH_SIZE="1"
+export GENERATE_GPU_MEMORY_UTILIZATION="0.90"
+```
+
+Use `GENERATE_BATCH_SIZE=1` for worst-prompt smoke tests. Increase batch size only after the longest-prompt smoke succeeds.
 
 ## Validate PubMed MedQA
 

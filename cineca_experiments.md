@@ -17,12 +17,22 @@ grep -E "GENERATE_MAX_MODEL_LEN|GENERATE_MAX_TOKENS|GENERATE_TIME_LIMIT|GENERATE
 Expected:
 
 ```bash
-export GENERATE_MAX_MODEL_LEN="12288"
+export GENERATE_MAX_MODEL_LEN="<set from prompt diagnostics>"
 export GENERATE_MAX_TOKENS="1024"
 export GENERATE_TIME_LIMIT="12:00:00"
 export GENERATE_GPUS="4"
 export GENERATE_TENSOR_PARALLEL_SIZE="4"
 ```
+
+For the current PubMed MedQA RAG/FRAG reruns, diagnostics recommended:
+
+```bash
+export GENERATE_MAX_MODEL_LEN="22528"
+export GENERATE_BATCH_SIZE="1"
+export GENERATE_GPU_MEMORY_UTILIZATION="0.90"
+```
+
+The `22528` value is based on a measured max PubMed MedQA Contriever FRAG prompt of 20280 tokens, plus 1024 generation tokens, plus a 512-token buffer, rounded to the next 1024-token multiple. Do not apply this value blindly to every future campaign; use the diagnostics below to choose the smallest safe context for each prompt-load group.
 
 ## Monitoring
 
@@ -55,8 +65,8 @@ These are rough estimates from smoke tests with Llama 3.1 70B, TP=4.
 | Experiment | Avg Prompt Tokens | Generation Time | Model Load | Notes |
 |---|---:|---:|---:|---|
 | zero_shot | 200-420 | ~4.8 sec/prompt | ~6-7 min/job | Short prompts |
-| standard_rag | 5000-7000 | ~5.9 sec/prompt | ~6-7 min/job | Needs `max_model_len=12288` |
-| frag | 5000-7000 | ~5.6 sec/prompt | ~6-7 min/job | Needs `max_model_len=12288` |
+| standard_rag | 5000-20000+ depending on collection | ~5.9 sec/prompt in earlier 12k runs | ~6-7 min/job | Set `max_model_len` from prompt diagnostics |
+| frag | 5000-20000+ depending on collection | ~5.6 sec/prompt in earlier 12k runs | ~6-7 min/job | Set `max_model_len` from prompt diagnostics |
 
 Approximate full-job wall times:
 
@@ -112,6 +122,71 @@ As before, do not submit `contriever/zero_shot`; zero-shot is not retriever-spec
 
 All jobs request 4 GPUs. Running two jobs in parallel requests 8 GPUs.
 
+### PubMed Context Diagnostics
+
+PubMed prompt loads can be substantially longer than the completed Wikipedia prompt loads. Before submitting full RAG/FRAG jobs, tokenize the prompt loads and set the context window from measured lengths:
+
+```bash
+python llm_frag_evaluation/scripts/report_prompt_lengths.py \
+  --prompt-load-dir llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed \
+  --model-path /leonardo_work/IscrC_SpecDLM/models/Llama-3.1-70B-Instruct \
+  --threshold 12288 \
+  --threshold 16384 \
+  --threshold 20480 \
+  --threshold 22528 \
+  --threshold 24576 \
+  --threshold 32768
+```
+
+For a failed run, generate a diagnostic report:
+
+```bash
+python llm_frag_evaluation/tests/diagnostics/diagnose_vllm_run.py \
+  --summary llm_frag_evaluation/outputs/predictions/source_collection_pubmed/medqa/contriever/frag/Meta-Llama-3-70B-Instruct/run_summary.json \
+  --errors llm_frag_evaluation/outputs/predictions/source_collection_pubmed/medqa/contriever/frag/Meta-Llama-3-70B-Instruct/generation_errors.jsonl \
+  --prompt-load llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/medqa/contriever/frag/Meta-Llama-3-70B-Instruct/prompts.jsonl \
+  --model-path /leonardo_work/IscrC_SpecDLM/models/Llama-3.1-70B-Instruct \
+  --run-name pubmed_medqa_contriever_frag_12288 \
+  --context-buffer-tokens 512
+```
+
+The diagnostic reports:
+
+```text
+max prompt tokens + max generation tokens + safety buffer
+```
+
+and prints the exact `GENERATE_MAX_MODEL_LEN` line to set in `llm_frag_evaluation/slurm/hpc.private.env`.
+
+Current measured PubMed MedQA Contriever FRAG values:
+
+| Field | Value |
+|---|---:|
+| Prompt count | 1273 |
+| Max prompt tokens | 20280 |
+| Prompts over 12288 | 406 |
+| Prompts over 16384 | 90 |
+| Max generation tokens | 1024 |
+| Safety buffer | 512 |
+| Recommended `GENERATE_MAX_MODEL_LEN` | 22528 |
+
+The longest-prompt smoke prompt load completed 7/7 predictions at `GENERATE_MAX_MODEL_LEN=22528`, `GENERATE_BATCH_SIZE=1`, and `GENERATE_GPU_MEMORY_UTILIZATION=0.90`.
+
+### PubMed Job Status As Of 2026-05-27
+
+The all-run diagnostic over `source_collection_pubmed` found 20 prompt loads:
+
+| Group | Status | Action |
+|---|---|---|
+| `bioasq/bm25/zero_shot` | Complete | No rerun needed |
+| `medqa/bm25/zero_shot` | Complete | No rerun needed |
+| MedQA BM25/Contriever RAG/FRAG | First run incomplete at 12288; four jobs relaunched at 22528 | Monitor, validate, evaluate |
+| BioASQ RAG/FRAG | Missing summaries / not run or not located | Run after prompt sizing |
+| MMLU all prompt loads | Missing summaries / not run or not located | Run after prompt sizing |
+| PubMedQA all prompt loads | Missing summaries / not run or not located | Run after prompt sizing |
+
+With 16 GPUs available and `GENERATE_GPUS=4`, run at most four jobs concurrently. For large-context jobs, start with `GENERATE_BATCH_SIZE=1`; increase only after a worst-prompt smoke test succeeds.
+
 ## Two-At-A-Time Schedule
 
 If running two jobs at a time, use this cadence. The check-back time is when it is reasonable to log in again and submit the next pair.
@@ -129,7 +204,7 @@ If running two jobs at a time, use this cadence. The check-back time is when it 
 | 9 (Completed) | `medqa/contriever/frag` + `mmlu/contriever/frag` | ~2.5h |
 | 10 (Completed) | `bioasq/contriever/frag` + `pubmedqa/contriever/frag` | ~1.5h |
 
-Current deviation from the pair schedule: PubMedQA and BioASQ RAG/FRAG blocks were run as four-job batches. The MedQA and MMLU RAG/FRAG blocks are also complete. All 20 planned full-generation jobs are complete.
+Current deviation from the pair schedule for the completed Wikipedia-resource campaign: PubMedQA and BioASQ RAG/FRAG blocks were run as four-job batches. The MedQA and MMLU RAG/FRAG blocks are also complete. All 20 planned Wikipedia full-generation jobs are complete.
 
 ## Current Job Status
 
@@ -158,7 +233,7 @@ Completed:
 | mmlu | contriever | standard_rag | Completed, metrics recorded |
 | mmlu | contriever | frag | Completed, metrics recorded |
 
-No planned CINECA generation jobs remain.
+No planned CINECA generation jobs remain for the Wikipedia-resource campaign. The PubMed-resource campaign is active and tracked in the PubMed section above.
 
 The exact prompt-load path appears in each job's `.out` file. For completed jobs, inspect the corresponding `frag-vllm_<JOBID>.out` log if the prompt-load path is needed later.
 

@@ -368,6 +368,54 @@ For the PubMed campaign, the prompt loads are written under:
 llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/
 ```
 
+### PubMed Context Sizing
+
+Do not assume that the Wikipedia `GENERATE_MAX_MODEL_LEN=12288` setting is sufficient for PubMed-backed RAG/FRAG jobs. PubMed passages are longer, and the required context window depends on the dataset, retriever, and experiment.
+
+Before full PubMed generation, scan prompt lengths:
+
+```shell
+python llm_frag_evaluation/scripts/report_prompt_lengths.py \
+  --prompt-load-dir llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed \
+  --model-path /leonardo_work/IscrC_SpecDLM/models/Llama-3.1-70B-Instruct \
+  --threshold 12288 \
+  --threshold 16384 \
+  --threshold 20480 \
+  --threshold 22528 \
+  --threshold 24576 \
+  --threshold 32768
+```
+
+For a failed or smoke run, create a diagnostic report:
+
+```shell
+python llm_frag_evaluation/tests/diagnostics/diagnose_vllm_run.py \
+  --summary llm_frag_evaluation/outputs/predictions/source_collection_pubmed/medqa/contriever/frag/Meta-Llama-3-70B-Instruct/run_summary.json \
+  --errors llm_frag_evaluation/outputs/predictions/source_collection_pubmed/medqa/contriever/frag/Meta-Llama-3-70B-Instruct/generation_errors.jsonl \
+  --prompt-load llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/medqa/contriever/frag/Meta-Llama-3-70B-Instruct/prompts.jsonl \
+  --model-path /leonardo_work/IscrC_SpecDLM/models/Llama-3.1-70B-Instruct \
+  --run-name pubmed_medqa_contriever_frag_12288 \
+  --context-buffer-tokens 512
+```
+
+The diagnostic reports:
+
+```text
+max prompt tokens + max generation tokens + safety buffer
+```
+
+and prints the exact `GENERATE_MAX_MODEL_LEN` line to set in `llm_frag_evaluation/slurm/hpc.private.env`.
+
+Current measured PubMed MedQA Contriever FRAG recommendation:
+
+```shell
+export GENERATE_MAX_MODEL_LEN="22528"
+export GENERATE_BATCH_SIZE="1"
+export GENERATE_GPU_MEMORY_UTILIZATION="0.90"
+```
+
+This setting was validated by a 7-record longest-prompt smoke run. Use `GENERATE_BATCH_SIZE=1` for worst-prompt smoke tests and increase only after the smoke succeeds.
+
 ### 8. Run One Smoke Job
 
 Start with one small smoke run before submitting full jobs:

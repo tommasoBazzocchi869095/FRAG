@@ -105,6 +105,8 @@ Current Llama 3.1 70B results and the LaTeX-ready table are documented in:
 - [`llm_frag_evaluation/RESULTS_TABLE.md`](llm_frag_evaluation/RESULTS_TABLE.md)
 - [`llm_frag_evaluation/PROMPT_LENGTH_REPORT.md`](llm_frag_evaluation/PROMPT_LENGTH_REPORT.md)
 
+The completed results currently documented there are Wikipedia-resource runs. PubMed-backed prompt loads are longer and require measured context sizing before vLLM generation. The active PubMed campaign uses diagnostics under `llm_frag_evaluation/tests/diagnostics/` to inspect prompt lengths, failed runs, and recommended `GENERATE_MAX_MODEL_LEN` values before full CINECA submission.
+
 ## Quick Start
 
 Create a Python environment and install the lightweight evaluation dependencies:
@@ -201,3 +203,5 @@ If you use the MedRAG or MIRAGE components, cite the original work:
 ## Repository Status
 
 This is an active research repository. The most complete and operational workflow currently lives in `llm_frag_evaluation/`; older exploratory training and analysis scripts are preserved for traceability.
+
+As of May 27, 2026, the Wikipedia-resource Llama 3.1 70B campaign is complete and recorded. The PubMed-resource campaign is active: zero-shot MedQA and BioASQ are complete, the first MedQA RAG/FRAG attempt at `GENERATE_MAX_MODEL_LEN=12288` exposed PubMed prompt-length overflows, and MedQA RAG/FRAG reruns are being executed with a measured context setting of `GENERATE_MAX_MODEL_LEN=22528`.

@@ -16,4 +16,6 @@ outputs/prompt_loads/*
 outputs/logs/*
 !outputs/logs/.gitkeep
 
+tests/diagnostics/reports/*
+
 slurm/hpc.private.env
