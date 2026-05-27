@@ -34,7 +34,7 @@ def prompt_text(tokenizer, messages):
 
 
 def iter_prompt_loads(root, model_alias):
-    return sorted(Path(root).glob(f"*/*/*/{model_alias}/prompts.jsonl"))
+    return sorted(Path(root).rglob(f"{model_alias}/prompts.jsonl"))
 
 
 def main():
