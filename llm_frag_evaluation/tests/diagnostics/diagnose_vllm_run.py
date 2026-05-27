@@ -55,11 +55,11 @@ def iter_jsonl(path):
                 }
 
 
-def update_top(heap, item, key, limit):
+def update_top(heap, item, key, limit, tie_breaker=0):
     value = item.get(key)
     if value is None:
         return
-    entry = (value, item)
+    entry = (value, tie_breaker, item)
     if len(heap) < limit:
         heapq.heappush(heap, entry)
     elif value > heap[0][0]:
@@ -91,7 +91,7 @@ def summarize_errors(path, top_n):
             prompt_token_stats["sum"] += prompt_tokens
             prompt_token_stats["min"] = prompt_tokens if prompt_token_stats["min"] is None else min(prompt_token_stats["min"], prompt_tokens)
             prompt_token_stats["max"] = prompt_tokens if prompt_token_stats["max"] is None else max(prompt_token_stats["max"], prompt_tokens)
-            update_top(top_prompt_errors, record, "prompt_tokens", top_n)
+            update_top(top_prompt_errors, record, "prompt_tokens", top_n, line_number)
 
         if error_type == "InvalidAnswer" and len(invalid_answers) < top_n:
             invalid_answers.append({**record, "line_number": line_number})
@@ -106,7 +106,7 @@ def summarize_errors(path, top_n):
         "total_error_lines": total,
         "error_type_counts": dict(counters),
         "prompt_token_stats": prompt_token_stats,
-        "top_prompt_errors": [item for _, item in sorted(top_prompt_errors, reverse=True)],
+        "top_prompt_errors": [item for _, _, item in sorted(top_prompt_errors, reverse=True)],
         "invalid_answers": invalid_answers,
         "examples_by_type": examples_by_type,
     }
@@ -158,6 +158,7 @@ def summarize_prompt_load(path, model_path, thresholds, top_n):
             },
             "prompt_tokens",
             top_n,
+            count,
         )
 
     return {
@@ -166,7 +167,7 @@ def summarize_prompt_load(path, model_path, thresholds, top_n):
         "max_tokens": maximum,
         "average_tokens": total / count if count else None,
         "over_threshold": over_threshold,
-        "top_prompts": [item for _, item in sorted(top_prompts, reverse=True)],
+        "top_prompts": [item for _, _, item in sorted(top_prompts, reverse=True)],
     }
 
 
