@@ -8,6 +8,25 @@ Use it after each smoke or full vLLM job to inspect:
 - `generation_errors.jsonl`
 - optional prompt-load token lengths
 
+To quickly inspect all prompt loads and identify which submitted runs need to be
+repeated:
+
+```bash
+python llm_frag_evaluation/tests/diagnostics/summarize_vllm_runs.py \
+  --prompt-load-root llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed \
+  --prediction-root llm_frag_evaluation/outputs/predictions/source_collection_pubmed
+```
+
+This writes:
+
+```text
+llm_frag_evaluation/tests/diagnostics/reports/vllm_run_summary.md
+llm_frag_evaluation/tests/diagnostics/reports/vllm_run_summary.csv
+```
+
+Runs with `PromptTooLong`, missing summaries, missing prediction files, invalid
+answers, or other generation errors are flagged with an action.
+
 Example on CINECA:
 
 ```bash
