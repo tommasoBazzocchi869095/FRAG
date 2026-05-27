@@ -181,7 +181,7 @@ The all-run diagnostic over `source_collection_pubmed` found 20 prompt loads:
 | `bioasq/bm25/zero_shot` | Complete | No rerun needed |
 | `medqa/bm25/zero_shot` | Complete | No rerun needed |
 | MedQA BM25/Contriever RAG/FRAG | First run incomplete at 12288; four jobs relaunched at 22528 | Monitor, validate, evaluate |
-| BioASQ RAG/FRAG | Missing summaries / not run or not located | Run after prompt sizing |
+| BioASQ RAG/FRAG | Four jobs submitted after MedQA context fix work | Monitor, validate, evaluate |
 | MMLU all prompt loads | Missing summaries / not run or not located | Run after prompt sizing |
 | PubMedQA all prompt loads | Missing summaries / not run or not located | Run after prompt sizing |
 

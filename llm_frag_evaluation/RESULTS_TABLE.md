@@ -14,7 +14,7 @@ Current PubMed-resource state as of May 27, 2026:
 | MedQA | BM25 | frag | First run incomplete at `GENERATE_MAX_MODEL_LEN=12288`; rerun submitted with measured context setting |
 | MedQA | Contriever | standard_rag | First run incomplete at `GENERATE_MAX_MODEL_LEN=12288`; rerun submitted with measured context setting |
 | MedQA | Contriever | frag | First run incomplete at `GENERATE_MAX_MODEL_LEN=12288`; rerun submitted with measured context setting |
-| BioASQ | BM25/Contriever | RAG/FRAG | Not run or not located |
+| BioASQ | BM25/Contriever | RAG/FRAG | Submitted; metrics pending |
 | MMLU | BM25/Contriever | zero_shot/RAG/FRAG | Not run or not located |
 | PubMedQA | BM25/Contriever | zero_shot/RAG/FRAG | Not run or not located |
 

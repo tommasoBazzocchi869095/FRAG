@@ -15,14 +15,14 @@ Current state as of May 27, 2026:
 - The vLLM runner logs individual prompt errors and continues instead of aborting the whole job.
 - The PubMed-resource campaign has started. MedQA was the first PubMed dataset run.
 - The incomplete MedQA RAG/FRAG prediction leaf folders were removed and the four MedQA RAG/FRAG jobs were relaunched concurrently with the larger context setting.
-- Next: monitor the four MedQA RAG/FRAG reruns, validate/evaluate them after completion, then run the remaining PubMed datasets: BioASQ, MMLU, and PubMedQA.
+- Next: monitor the MedQA RAG/FRAG reruns and newly submitted BioASQ RAG/FRAG jobs, validate/evaluate them after completion, then run the remaining PubMed datasets: MMLU and PubMedQA.
 
 ## PubMed Campaign Status
 
 | Dataset | Status | Next action |
 |---|---|---|
 | medqa | Zero-shot complete; first RAG/FRAG attempt incomplete at 12288; four RAG/FRAG reruns submitted at 22528 | Monitor reruns, validate predictions, compute metrics, record results |
-| bioasq | `bm25/zero_shot` complete; RAG/FRAG not run or not located | Run RAG/FRAG after prompt length sizing |
+| bioasq | `bm25/zero_shot` complete; four RAG/FRAG jobs submitted | Monitor jobs, validate predictions, compute metrics, record results |
 | mmlu | Not run yet for PubMed resource | Run 5 prompt-load jobs after prompt length sizing |
 | pubmedqa | Not run yet for PubMed resource | Run 5 prompt-load jobs after prompt length sizing |
 
