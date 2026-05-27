@@ -4,26 +4,47 @@
 
 The filled Wikipedia-resource results are kept separate from PubMed-resource results. PubMed rows should be added only after prediction validation and metric computation are complete for each run.
 
-Current PubMed-resource state as of May 27, 2026:
+Current PubMed-resource state as of May 28, 2026:
 
 | Dataset | Retriever | Experiment | Status |
 |---|---|---|---|
 | BioASQ | BM25 | zero_shot | Complete; metrics recorded |
-| MedQA | BM25 | zero_shot | Complete; metrics pending |
-| MedQA | BM25 | standard_rag | First run incomplete at `GENERATE_MAX_MODEL_LEN=12288`; rerun submitted with measured context setting |
-| MedQA | BM25 | frag | First run incomplete at `GENERATE_MAX_MODEL_LEN=12288`; rerun submitted with measured context setting |
-| MedQA | Contriever | standard_rag | First run incomplete at `GENERATE_MAX_MODEL_LEN=12288`; rerun submitted with measured context setting |
-| MedQA | Contriever | frag | First run incomplete at `GENERATE_MAX_MODEL_LEN=12288`; rerun submitted with measured context setting |
+| MedQA | BM25 | zero_shot | Complete; metrics recorded from retrieval-independent zero-shot baseline |
+| MedQA | BM25 | standard_rag | Complete with 9 missing predictions; metrics recorded |
+| MedQA | BM25 | frag | Complete with 11 missing predictions; metrics recorded |
+| MedQA | Contriever | standard_rag | Complete; metrics recorded |
+| MedQA | Contriever | frag | Complete; metrics recorded |
 | BioASQ | BM25/Contriever | RAG/FRAG | Complete; metrics recorded |
-| MMLU | BM25/Contriever | zero_shot/RAG/FRAG | Not run or not located |
-| PubMedQA | BM25/Contriever | zero_shot/RAG/FRAG | Not run or not located |
+| MMLU | BM25/Contriever | zero_shot/RAG/FRAG | RAG/FRAG generation active/pending; zero-shot reused from retrieval-independent baseline |
+| PubMedQA | BM25/Contriever | zero_shot/RAG/FRAG | RAG/FRAG complete with 1 missing or invalid prediction each; metrics recorded; zero-shot reused from retrieval-independent baseline |
 
-The current measured PubMed MedQA Contriever FRAG context recommendation is `GENERATE_MAX_MODEL_LEN=22528`, based on a 20280-token max prompt, 1024 generation tokens, and a 512-token buffer. Add remaining PubMed metric rows only after full reruns are complete and validated.
+The current measured PubMed MedQA Contriever FRAG context recommendation is `GENERATE_MAX_MODEL_LEN=22528`, based on a 20280-token max prompt, 1024 generation tokens, and a 512-token buffer. MedQA BM25 still had 9 missing predictions for RAG and 11 for FRAG at this setting; these are accepted as missing/wrong. Add remaining PubMed MMLU metric rows only after full reruns are complete and validated.
 
 ## PubMed-Resource Results
 
 Current filled PubMed-resource result:
 
+- MMLU / BM25 / zero-shot / Llama-3.1-70B-Instruct
+- `n = 1089`
+- `missing_predictions = 0`
+- Accuracy: `0.8714416896235078`
+- Precision macro: `0.8680315537269185`
+- Recall macro: `0.8715694678185778`
+- F1 macro: `0.8695903739632252`
+- MedQA / BM25 / zero-shot / Llama-3.1-70B-Instruct
+- `n = 1273`
+- `missing_predictions = 0`
+- Accuracy: `0.783974862529458`
+- Precision macro: `0.7880424652768914`
+- Recall macro: `0.7788646197680493`
+- F1 macro: `0.781184669047834`
+- PubMedQA / BM25 / zero-shot / Llama-3.1-70B-Instruct
+- `n = 500`
+- `missing_predictions = 2`
+- Accuracy: `0.606`
+- Precision macro: `0.3008562918838421`
+- Recall macro: `0.30886609210187804`
+- F1 macro: `0.2917741323463905`
 - BioASQ / BM25 / zero-shot / Llama-3.1-70B-Instruct
 - `n = 618`
 - `missing_predictions = 0`
@@ -59,6 +80,62 @@ Current filled PubMed-resource result:
 - Precision macro: `0.8956310679611651`
 - Recall macro: `0.8811999772946586`
 - F1 macro: `0.887539969324356`
+- MedQA / BM25 / standard_rag / Llama-3.1-70B-Instruct
+- `n = 1273`
+- `missing_predictions = 9`
+- Accuracy: `0.769835035349568`
+- Precision macro: `0.6241293398620343`
+- Recall macro: `0.6117566261356446`
+- F1 macro: `0.6158745670031489`
+- MedQA / BM25 / frag / Llama-3.1-70B-Instruct
+- `n = 1273`
+- `missing_predictions = 11`
+- Accuracy: `0.7659073055773763`
+- Precision macro: `0.6221920154452606`
+- Recall macro: `0.6083169070446856`
+- F1 macro: `0.613082443771767`
+- MedQA / Contriever / standard_rag / Llama-3.1-70B-Instruct
+- `n = 1273`
+- `missing_predictions = 0`
+- Accuracy: `0.7674783974862529`
+- Precision macro: `0.7708989887374971`
+- Recall macro: `0.7618220600196907`
+- F1 macro: `0.7642955317606197`
+- MedQA / Contriever / frag / Llama-3.1-70B-Instruct
+- `n = 1273`
+- `missing_predictions = 0`
+- Accuracy: `0.7729772191673213`
+- Precision macro: `0.7767664271616609`
+- Recall macro: `0.7664960197660415`
+- F1 macro: `0.769308796952899`
+- PubMedQA / BM25 / standard_rag / Llama-3.1-70B-Instruct
+- `n = 500`
+- `missing_predictions = 1`
+- Accuracy: `0.8`
+- Precision macro: `0.45155677655677656`
+- Recall macro: `0.4479679740549306`
+- F1 macro: `0.429724111866969`
+- PubMedQA / BM25 / frag / Llama-3.1-70B-Instruct
+- `n = 500`
+- `missing_predictions = 1`
+- Accuracy: `0.798`
+- Precision macro: `0.4021291208791209`
+- Recall macro: `0.44399601234885516`
+- F1 macro: `0.42196493982208266`
+- PubMedQA / Contriever / standard_rag / Llama-3.1-70B-Instruct
+- `n = 500`
+- `missing_predictions = 1`
+- Accuracy: `0.796`
+- Precision macro: `0.43560470387857075`
+- Recall macro: `0.4467298726914112`
+- F1 macro: `0.4280397622177209`
+- PubMedQA / Contriever / frag / Llama-3.1-70B-Instruct
+- `n = 500`
+- `missing_predictions = 1`
+- Accuracy: `0.798`
+- Precision macro: `0.4020469886911545`
+- Recall macro: `0.4445695051882343`
+- F1 macro: `0.42224032566864567`
 
 Values in the PubMed-resource table are reported as percentages.
 
@@ -66,28 +143,64 @@ Values in the PubMed-resource table are reported as percentages.
 \begin{table*}[t]
 \centering
 \small
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{lcccc}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lcccccccccccccccccccc}
 \toprule
-& \multicolumn{4}{c}{BioASQ} \\
+& \multicolumn{4}{c}{MMLU}
+& \multicolumn{4}{c}{MedQA}
+& \multicolumn{4}{c}{PubMedQA}
+& \multicolumn{4}{c}{BioASQ}
+& \multicolumn{4}{c}{Average} \\
 \cmidrule(lr){2-5}
-\textbf{Llama-3.1-70B-Instruct}
+\cmidrule(lr){6-9}
+\cmidrule(lr){10-13}
+\cmidrule(lr){14-17}
+\cmidrule(lr){18-21}
+\textbf{PubMed}
+& P & R & F1 & Acc
+& P & R & F1 & Acc
+& P & R & F1 & Acc
+& P & R & F1 & Acc
 & P & R & F1 & Acc \\
 \midrule
-Zero-shot
-& 84.91 & 78.44 & 80.18 & 83.17 \\
+Zero Shot
+& 86.80 & 87.16 & 86.96 & 87.14
+& 78.80 & 77.89 & 78.12 & 78.40
+& 30.09 & 30.89 & 29.18 & 60.60
+& 84.91 & 78.44 & 80.18 & 83.17
+& 70.15 & 68.59 & 68.61 & 77.33 \\ \hline
+
 BM25 RAG
-& 92.18 & 91.22 & 91.66 & 92.39 \\
+& -- & -- & -- & --
+& 62.41 & 61.18 & 61.59 & 76.98
+& 45.16 & 44.80 & 42.97 & 80.00
+& 92.18 & 91.22 & 91.66 & 92.39
+& -- & -- & -- & -- \\
+
 BM25 FRAG
-& 92.28 & 91.12 & 91.65 & 92.39 \\
+& -- & -- & -- & --
+& 62.22 & 60.83 & 61.31 & 76.59
+& 40.21 & 44.40 & 42.20 & 79.80
+& 92.28 & 91.12 & 91.65 & 92.39
+& -- & -- & -- & -- \\ \hline
+
 Contriever RAG
-& 89.61 & 88.44 & 88.97 & 89.97 \\
+& -- & -- & -- & --
+& 77.09 & 76.18 & 76.43 & 76.75
+& 43.56 & 44.67 & 42.80 & 79.60
+& 89.61 & 88.44 & 88.97 & 89.97
+& -- & -- & -- & -- \\
+
 Contriever FRAG
-& 89.56 & 88.12 & 88.75 & 89.81 \\
+& -- & -- & -- & --
+& 77.68 & 76.65 & 76.93 & 77.30
+& 40.20 & 44.46 & 42.22 & 79.80
+& 89.56 & 88.12 & 88.75 & 89.81
+& -- & -- & -- & -- \\
 \bottomrule
 \end{tabular}
-\caption{PubMed-resource evaluation results for Llama-3.1-70B-Instruct on BioASQ. We report macro precision (P), macro recall (R), macro F1 (F1), and accuracy (Acc) for zero-shot prompting, standard retrieval-augmented generation (RAG), and factuality-aware retrieval-augmented generation (FRAG). RAG and FRAG are evaluated with BM25 and Contriever retrieval over PubMed passages.}
-\label{tab:llama31_70b_pubmed_bioasq_results}
+\caption{PubMed-resource evaluation results for Llama-3.1-70B-Instruct on the MIRAGE medical question answering benchmarks. We report macro precision (P), macro recall (R), macro F1 (F1), and accuracy (Acc) for zero-shot prompting, standard retrieval-augmented generation (RAG), and factuality-aware retrieval-augmented generation (FRAG). RAG and FRAG are evaluated with BM25 and Contriever retrieval over PubMed passages. Dashes indicate PubMed-resource results that are pending. MedQA BM25 RAG and BM25 FRAG include 9 and 11 missing predictions, respectively, due to prompt-length overflows; PubMedQA RAG/FRAG runs include 1 missing or invalid prediction each. Missing predictions are counted as incorrect. The Average columns should be filled only after MMLU, MedQA, PubMedQA, and BioASQ are all complete.}
+\label{tab:llama31_70b_pubmed_frag_results}
 \end{table*}
 ```
 

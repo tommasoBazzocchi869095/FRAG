@@ -1,6 +1,6 @@
 # CINECA `llm_frag_evaluation` Next Steps
 
-Current state as of May 27, 2026:
+Current state as of May 28, 2026:
 
 - Prompt code is aligned with previous MedRAG templates and pushed to GitHub.
 - The completed experiments used Wikipedia as the retrieval resource, so their Step 2 inputs are the files under `llm_frag_evaluation/data/inputs/source_collection_wiki/`.
@@ -13,18 +13,18 @@ Current state as of May 27, 2026:
 - With `GENERATE_MAX_TOKENS=1024` and a 512-token safety buffer, the measured recommendation for PubMed MedQA Contriever FRAG is `GENERATE_MAX_MODEL_LEN=22528`.
 - A longest-prompt smoke run for PubMed MedQA Contriever FRAG completed 7/7 predictions with `GENERATE_MAX_MODEL_LEN=22528`, `GENERATE_BATCH_SIZE=1`, and `GENERATE_GPU_MEMORY_UTILIZATION=0.90`.
 - The vLLM runner logs individual prompt errors and continues instead of aborting the whole job.
-- The PubMed-resource campaign has started. MedQA was the first PubMed dataset run.
-- The incomplete MedQA RAG/FRAG prediction leaf folders were removed and the four MedQA RAG/FRAG jobs were relaunched concurrently with the larger context setting.
-- Next: monitor the MedQA RAG/FRAG reruns and newly submitted BioASQ RAG/FRAG jobs, validate/evaluate them after completion, then run the remaining PubMed datasets: MMLU and PubMedQA.
+- The PubMed-resource campaign is mostly complete. BioASQ is complete with metrics recorded. MedQA is complete/accepted with metrics recorded; BM25 RAG has 9 missing predictions and BM25 FRAG has 11 missing predictions due to remaining prompt-length overflows, counted as incorrect. PubMedQA RAG/FRAG is complete/accepted with 1 missing or invalid prediction per run, counted as incorrect.
+- MMLU PubMed runs are the remaining active/pending generation jobs.
+- Next: monitor MMLU PubMed jobs, validate/evaluate them after completion, then fill the final PubMed table averages.
 
 ## PubMed Campaign Status
 
 | Dataset | Status | Next action |
 |---|---|---|
-| medqa | Zero-shot complete; first RAG/FRAG attempt incomplete at 12288; four RAG/FRAG reruns submitted at 22528 | Monitor reruns, validate predictions, compute metrics, record results |
-| bioasq | `bm25/zero_shot` complete; four RAG/FRAG jobs submitted | Monitor jobs, validate predictions, compute metrics, record results |
-| mmlu | Not run yet for PubMed resource | Run 5 prompt-load jobs after prompt length sizing |
-| pubmedqa | Not run yet for PubMed resource | Run 5 prompt-load jobs after prompt length sizing |
+| medqa | Complete/accepted; metrics recorded. BM25 RAG has 9 missing predictions and BM25 FRAG has 11 missing predictions. | Add/maintain table values and missing-prediction note |
+| bioasq | Complete; metrics recorded for all five settings | Add/maintain table values |
+| mmlu | Generation active/pending | Monitor jobs, validate predictions, compute metrics, record results |
+| pubmedqa | RAG/FRAG complete/accepted with 1 missing or invalid prediction per run; metrics recorded. Zero-shot reused from retrieval-independent baseline. | Add/maintain table values and missing-prediction note |
 
 All PubMed prompt loads are under:
 

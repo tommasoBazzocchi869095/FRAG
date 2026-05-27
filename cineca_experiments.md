@@ -172,7 +172,7 @@ Current measured PubMed MedQA Contriever FRAG values:
 
 The longest-prompt smoke prompt load completed 7/7 predictions at `GENERATE_MAX_MODEL_LEN=22528`, `GENERATE_BATCH_SIZE=1`, and `GENERATE_GPU_MEMORY_UTILIZATION=0.90`.
 
-### PubMed Job Status As Of 2026-05-27
+### PubMed Job Status As Of 2026-05-28
 
 The all-run diagnostic over `source_collection_pubmed` found 20 prompt loads:
 
@@ -180,10 +180,10 @@ The all-run diagnostic over `source_collection_pubmed` found 20 prompt loads:
 |---|---|---|
 | `bioasq/bm25/zero_shot` | Complete | No rerun needed |
 | `medqa/bm25/zero_shot` | Complete | No rerun needed |
-| MedQA BM25/Contriever RAG/FRAG | First run incomplete at 12288; four jobs relaunched at 22528 | Monitor, validate, evaluate |
-| BioASQ RAG/FRAG | Four jobs submitted after MedQA context fix work | Monitor, validate, evaluate |
-| MMLU all prompt loads | Missing summaries / not run or not located | Run after prompt sizing |
-| PubMedQA all prompt loads | Missing summaries / not run or not located | Run after prompt sizing |
+| MedQA BM25/Contriever RAG/FRAG | Complete/accepted; metrics recorded. BM25 RAG has 9 missing predictions and BM25 FRAG has 11 missing predictions. | Keep missing-prediction note in tables |
+| BioASQ RAG/FRAG | Complete; metrics recorded | No rerun needed |
+| MMLU all prompt loads | Generation active/pending | Monitor, validate, evaluate |
+| PubMedQA RAG/FRAG | Complete/accepted; metrics recorded with 1 missing or invalid prediction per run | Keep missing-prediction note in tables |
 
 With 16 GPUs available and `GENERATE_GPUS=4`, run at most four jobs concurrently. For large-context jobs, start with `GENERATE_BATCH_SIZE=1`; increase only after a worst-prompt smoke test succeeds.
 

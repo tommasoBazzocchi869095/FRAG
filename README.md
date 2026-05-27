@@ -204,4 +204,4 @@ If you use the MedRAG or MIRAGE components, cite the original work:
 
 This is an active research repository. The most complete and operational workflow currently lives in `llm_frag_evaluation/`; older exploratory training and analysis scripts are preserved for traceability.
 
-As of May 27, 2026, the Wikipedia-resource Llama 3.1 70B campaign is complete and recorded. The PubMed-resource campaign is active: zero-shot MedQA and BioASQ are complete, the first MedQA RAG/FRAG attempt at `GENERATE_MAX_MODEL_LEN=12288` exposed PubMed prompt-length overflows, MedQA RAG/FRAG reruns are being executed with a measured context setting of `GENERATE_MAX_MODEL_LEN=22528`, and the BioASQ RAG/FRAG jobs have also been submitted.
+As of May 28, 2026, the Wikipedia-resource Llama 3.1 70B campaign is complete and recorded. The PubMed-resource campaign is active and near completion: BioASQ, MedQA, and PubMedQA have recorded metrics, with accepted missing-prediction notes for MedQA BM25 and PubMedQA RAG/FRAG runs. MMLU PubMed generation is the remaining active/pending dataset.
