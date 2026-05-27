@@ -16,10 +16,22 @@ python llm_frag_evaluation/tests/diagnostics/diagnose_vllm_run.py \
   --errors llm_frag_evaluation/outputs/predictions/source_collection_pubmed/medqa/contriever/frag/Meta-Llama-3-70B-Instruct/generation_errors.jsonl \
   --prompt-load llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/medqa/contriever/frag/Meta-Llama-3-70B-Instruct/prompts.jsonl \
   --model-path /leonardo_work/IscrC_SpecDLM/models/Llama-3.1-70B-Instruct \
-  --run-name pubmed_medqa_contriever_frag_12288
+  --run-name pubmed_medqa_contriever_frag_12288 \
+  --context-buffer-tokens 512
 ```
 
-The script writes a Markdown report and a JSON summary under `reports/`.
+The script writes a Markdown report and a JSON summary under `reports/`. When
+`--prompt-load` and `--model-path` are provided, the report includes a context
+recommendation:
+
+```text
+max prompt tokens + max generation tokens + safety buffer
+```
+
+It also prints the exact `GENERATE_MAX_MODEL_LEN` line to put in
+`llm_frag_evaluation/slurm/hpc.private.env`, rounded up to the next 1024-token
+multiple by default. The default buffer is 512 tokens; increase it with
+`--context-buffer-tokens` if you want more margin.
 
 To test a context-length fix, create a smoke prompt-load from the longest prompts
 instead of only running the first five records:

@@ -19,6 +19,18 @@ def parse_args():
     parser.add_argument("--output-dir", default="llm_frag_evaluation/tests/diagnostics/reports")
     parser.add_argument("--threshold", action="append", type=int, default=None)
     parser.add_argument("--top-n", type=int, default=20)
+    parser.add_argument(
+        "--context-buffer-tokens",
+        type=int,
+        default=512,
+        help="Safety buffer added on top of max prompt tokens plus max generation tokens.",
+    )
+    parser.add_argument(
+        "--context-round-to",
+        type=int,
+        default=1024,
+        help="Round the recommended context window up to this token multiple.",
+    )
     return parser.parse_args()
 
 
@@ -164,16 +176,21 @@ def pct(part, whole):
     return f"{(part / whole) * 100:.2f}%"
 
 
-def recommended_context(summary, prompt_summary):
+def recommended_context(summary, prompt_summary, buffer_tokens, round_to):
     max_tokens = summary.get("generation", {}).get("max_tokens")
     if prompt_summary and prompt_summary.get("max_tokens") and max_tokens:
-        needed = prompt_summary["max_tokens"] + max_tokens
-        rounded = int(math.ceil(needed / 1024) * 1024)
+        minimum = prompt_summary["max_tokens"] + max_tokens
+        buffered = minimum + buffer_tokens
+        rounded = int(math.ceil(buffered / round_to) * round_to)
         return {
             "max_prompt_tokens": prompt_summary["max_tokens"],
             "max_generation_tokens": max_tokens,
-            "minimum_context_with_full_generation": needed,
-            "rounded_context_suggestion": rounded,
+            "buffer_tokens": buffer_tokens,
+            "round_to": round_to,
+            "minimum_context_without_buffer": minimum,
+            "minimum_context_with_buffer": buffered,
+            "recommended_generate_max_model_len": rounded,
+            "hpc_private_env_line": f'export GENERATE_MAX_MODEL_LEN="{rounded}"',
         }
     return None
 
@@ -246,8 +263,12 @@ def write_reports(output_dir, run_name, payload):
             "",
             f"- Max prompt tokens: `{recommendation['max_prompt_tokens']}`",
             f"- Max generation tokens: `{recommendation['max_generation_tokens']}`",
-            f"- Minimum context for full generation budget: `{recommendation['minimum_context_with_full_generation']}`",
-            f"- Rounded context suggestion: `{recommendation['rounded_context_suggestion']}`",
+            f"- Safety buffer tokens: `{recommendation['buffer_tokens']}`",
+            f"- Minimum context without buffer: `{recommendation['minimum_context_without_buffer']}`",
+            f"- Minimum context with buffer: `{recommendation['minimum_context_with_buffer']}`",
+            f"- Rounded to token multiple: `{recommendation['round_to']}`",
+            f"- Recommended `GENERATE_MAX_MODEL_LEN`: `{recommendation['recommended_generate_max_model_len']}`",
+            f"- Add to `llm_frag_evaluation/slurm/hpc.private.env`: `{recommendation['hpc_private_env_line']}`",
         ])
 
     if errors["top_prompt_errors"]:
@@ -288,7 +309,12 @@ def main():
         "summary": summary,
         "errors": errors,
         "prompt_load": prompt_summary,
-        "recommendation": recommended_context(summary, prompt_summary),
+        "recommendation": recommended_context(
+            summary,
+            prompt_summary,
+            args.context_buffer_tokens,
+            args.context_round_to,
+        ),
     }
     json_path, md_path = write_reports(args.output_dir, run_name, payload)
     print(json.dumps({"json_report": str(json_path), "markdown_report": str(md_path)}, indent=2))
