@@ -15,7 +15,101 @@ Current state as of May 28, 2026:
 - The vLLM runner logs individual prompt errors and continues instead of aborting the whole job.
 - The PubMed-resource campaign is mostly complete. BioASQ is complete with metrics recorded. MedQA is complete/accepted with metrics recorded; BM25 RAG has 9 missing predictions and BM25 FRAG has 11 missing predictions due to remaining prompt-length overflows, counted as incorrect. PubMedQA RAG/FRAG is complete/accepted with 1 missing or invalid prediction per run, counted as incorrect.
 - MMLU PubMed runs are the remaining active/pending generation jobs.
-- Next: monitor MMLU PubMed jobs, validate/evaluate them after completion, then fill the final PubMed table averages.
+- First task tomorrow: prepare the next model sweep before launching new generation. Download/check model snapshots, define HPC launch profiles, and create experiment launch commands for the general-purpose, Qwen, and biomedical models listed below.
+- Then: monitor MMLU PubMed jobs, validate/evaluate them after completion, and fill the final PubMed table averages.
+
+## First Task Tomorrow: Next Model Sweep
+
+Prepare the next generation campaign across model families and scales. The goal is to reuse the existing PubMed/Wikipedia prompt-load workflow while choosing GPU counts, tensor parallel sizes, context windows, and batch sizes appropriate to each model size.
+
+### Models To Download Or Verify
+
+General-purpose Llama instruction models:
+
+```text
+meta-llama/Llama-3.2-1B-Instruct
+meta-llama/Llama-3.2-3B-Instruct
+meta-llama/Llama-3.1-8B-Instruct
+meta-llama/Llama-3.1-70B-Instruct
+```
+
+`Llama-3.1-8B-Instruct` is a useful reference point because it has been used in recent medical RAG work.
+
+Qwen instruction models:
+
+```text
+Qwen/Qwen2.5-1.5B-Instruct
+Qwen/Qwen2.5-3B-Instruct
+Qwen/Qwen2.5-7B-Instruct
+Qwen/Qwen2.5-14B-Instruct
+Qwen/Qwen2.5-32B-Instruct
+Qwen/Qwen2.5-72B-Instruct
+```
+
+Medical and biomedical models:
+
+```text
+google/medgemma-4b-it
+google/medgemma-27b-text-it
+aaditya/Llama3-OpenBioLLM-8B
+axiong/PMC_LLaMA_13B
+```
+
+Confirm exact Hugging Face IDs and access requirements before downloading. Some models may require license acceptance, authentication, or slightly different repository names.
+
+### Download Plan
+
+Use local snapshots under the shared CINECA model directory, for example:
+
+```text
+/leonardo_work/IscrC_SpecDLM/models/
+```
+
+Download each model with `huggingface_hub.snapshot_download`, limiting workers to avoid login-node pressure:
+
+```bash
+source .venv_frag_vllm/bin/activate
+export HF_TOKEN="..."
+export MODEL_ID="meta-llama/Llama-3.1-8B-Instruct"
+export MODEL_PATH="/leonardo_work/IscrC_SpecDLM/models/Llama-3.1-8B-Instruct"
+python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='$MODEL_ID', local_dir='$MODEL_PATH', token='$HF_TOKEN', max_workers=2)"
+```
+
+Repeat with a stable local folder name for each model.
+
+### Launch Profile Plan
+
+Create or prepare model-specific launch profiles instead of using one `hpc.private.env` for everything. Smaller models should not pay the memory cost of the 70B long-context profile.
+
+Initial profile sketch:
+
+| Model size | GPUs | Tensor parallel | Suggested context policy | Initial batch size |
+|---|---:|---:|---|---:|
+| 1B-4B | 1 | 1 | Use prompt-length diagnostics; likely 12288-22528 depending on prompt load | 4-8 |
+| 7B-14B | 1 | 1 | Use prompt-length diagnostics; likely 12288-22528 depending on prompt load | 2-6 |
+| 27B-32B | 2 | 2 | Use prompt-length diagnostics; start conservative | 1-4 |
+| 70B-72B | 4 | 4 | Known PubMed MedQA needs 22528 for long prompts | 1-2 |
+
+Before full runs, create longest-prompt smoke loads for each model/profile combination using:
+
+```bash
+python llm_frag_evaluation/tests/diagnostics/create_long_prompt_smoke_load.py \
+  --prompt-load llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/medqa/contriever/frag/Meta-Llama-3-70B-Instruct/prompts.jsonl \
+  --model-path /leonardo_work/IscrC_SpecDLM/models/<MODEL_LOCAL_DIR> \
+  --run-name <model>_pubmed_medqa_longest \
+  --top-longest 5 \
+  --include-first 2
+```
+
+Then run the diagnostic output with the intended profile before launching full jobs.
+
+### Experiment Creation Tasks
+
+1. Add or generate model aliases for all new models so outputs do not overwrite `Meta-Llama-3-70B-Instruct`.
+2. Create prompt loads or adapt prompt-load paths per model alias if the current prompt-load structure is model-specific.
+3. Build a submission matrix: model, dataset, retriever, experiment, source collection, context window, GPUs, tensor parallel size, batch size.
+4. Start with small models and smoke tests to validate tokenizer/chat-template compatibility.
+5. For each model family, run a small subset first, inspect outputs for valid answer format, then launch the full matrix.
 
 ## PubMed Campaign Status
 
