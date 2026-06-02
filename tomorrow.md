@@ -154,7 +154,15 @@ python llm_frag_evaluation/scripts/plan_model_sweep.py \
   --write-profiles
 ```
 
-These files are ignored by Git because they may contain local CINECA account and environment paths. Submit commands pass the intended profile with `HPC_PRIVATE_ENV=...`. Existing env files are not overwritten unless `--overwrite-profiles` is passed.
+These files are ignored by Git because they may contain local CINECA account and environment paths. Submit commands should normally select the intended profile with `--model-alias <alias>`, which sources `llm_frag_evaluation/slurm/model_profiles/<alias>.env`. Existing env files are not overwritten unless `--overwrite-profiles` is passed. `HPC_PRIVATE_ENV=...` remains available as a manual override, but should not be the default workflow.
+
+For example, a Qwen 1.5B Wikipedia smoke job should be submitted as:
+
+```bash
+bash llm_frag_evaluation/slurm/sh/submit_generate_prompt_load_smoke.sh \
+  --model-alias Qwen2.5-1.5B-Instruct \
+  llm_frag_evaluation/outputs/prompt_loads/source_collection_wiki/medqa/bm25/zero_shot/Qwen2.5-1.5B-Instruct/prompts.jsonl
+```
 
 Recommended launch order:
 

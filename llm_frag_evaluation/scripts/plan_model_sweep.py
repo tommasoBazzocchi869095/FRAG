@@ -183,7 +183,6 @@ def print_smoke(config, models, profile_dir):
             / "Meta-Llama-3-70B-Instruct"
             / "prompts.jsonl"
         )
-        env_path = profile_env_path(profile_dir, model["alias"])
         print(
             "python llm_frag_evaluation/tests/diagnostics/create_long_prompt_smoke_load.py "
             f"--prompt-load {quote(source)} "
@@ -191,16 +190,15 @@ def print_smoke(config, models, profile_dir):
             f"--run-name {quote(run_name)} "
             "--top-longest 5 --include-first 2"
         )
-        print(f"HPC_PRIVATE_ENV={quote(str(env_path))} bash {SMOKE_SCRIPT} {quote(str(smoke_prompt))}")
+        print(f"bash {SMOKE_SCRIPT} --model-alias {quote(model['alias'])} {quote(str(smoke_prompt))}")
         print()
 
 
 def print_submit(config, models, collections, profile_dir):
     for model in models:
-        env_path = profile_env_path(profile_dir, model["alias"])
         for collection, dataset, retriever, experiment in iter_jobs(config, collections, model):
             prompt_path = prompt_load_path(collection["name"], dataset, retriever, experiment, model["alias"])
-            print(f"HPC_PRIVATE_ENV={quote(str(env_path))} bash {SUBMIT_SCRIPT} {quote(str(prompt_path))}")
+            print(f"bash {SUBMIT_SCRIPT} --model-alias {quote(model['alias'])} {quote(str(prompt_path))}")
 
 
 def main():
