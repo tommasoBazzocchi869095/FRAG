@@ -147,8 +147,8 @@ On CINECA, pass the real Slurm account if the default placeholder has not been r
 python llm_frag_evaluation/scripts/plan_model_sweep.py \
   --family qwen \
   --collection source_collection_pubmed \
-  --hpc-account iscrc_specdlm \
-  --hpc-qos boost_qos_bprod \
+  --hpc-account IscrC_SpecDLM \
+  --hpc-qos normal \
   --hpc-partition boost_usr_prod \
   --vllm-venv-activate /leonardo_work/IscrC_SpecDLM/FRAG/.venv_frag_vllm/bin/activate \
   --write-profiles
