@@ -1,5 +1,7 @@
 # CINECA Experiments
 
+Historical CINECA experiment notes and completed campaign records. For the current multi-model sweep workflow, use [`cineca_model_sweep.md`](cineca_model_sweep.md).
+
 Run from the repository root:
 
 ```bash

@@ -10,7 +10,7 @@ This folder contains a separate line of experiments for evaluating different LLM
 
 For the current multi-model CINECA sweep, use the dedicated runbook:
 
-- [`CINECA_MODEL_SWEEP_RUNBOOK.md`](CINECA_MODEL_SWEEP_RUNBOOK.md)
+- [`../docs/cineca_model_sweep.md`](../docs/cineca_model_sweep.md)
 
 The FRAG score is:
 

@@ -70,7 +70,7 @@ FRAG/
   Model - Copia/                  # Factuality classifier training and analysis scripts
   llm_frag_evaluation/            # FRAG prompt generation, inference, validation, metrics
   README.md                       # Project landing page
-  cineca_experiments.md           # Experiment notes for CINECA runs
+  docs/                           # Stable documentation and CINECA runbooks
   tomorrow.md                     # Working notes
 ```
 
@@ -104,6 +104,10 @@ Current Llama 3.1 70B results and the LaTeX-ready table are documented in:
 
 - [`llm_frag_evaluation/RESULTS_TABLE.md`](llm_frag_evaluation/RESULTS_TABLE.md)
 - [`llm_frag_evaluation/PROMPT_LENGTH_REPORT.md`](llm_frag_evaluation/PROMPT_LENGTH_REPORT.md)
+
+Stable project documentation starts at:
+
+- [`docs/README.md`](docs/README.md)
 
 The completed results currently documented there include both Wikipedia-resource and PubMed-resource Llama 3.1 70B runs. PubMed-backed prompt loads are longer than Wikipedia prompt loads; diagnostics under `llm_frag_evaluation/tests/diagnostics/` document prompt lengths, failed runs, and recommended `GENERATE_MAX_MODEL_LEN` values used before full CINECA submission.
 
