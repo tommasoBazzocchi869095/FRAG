@@ -28,12 +28,19 @@ if [[ -n "${PROMPT_LIMIT:-}" ]]; then
   LIMIT_ARGS=(--limit "${PROMPT_LIMIT}")
 fi
 
+VLLM_EXTRA_ARGS=()
+if [[ -n "${GENERATE_MAX_NUM_SEQS:-}" ]]; then
+  VLLM_EXTRA_ARGS+=(--max-num-seqs "${GENERATE_MAX_NUM_SEQS}")
+fi
+
 python llm_frag_evaluation/scripts/run_vllm_prompt_load.py \
   --prompt-load "${PROMPT_LOAD_PATH}" \
   --model-path "${HPC_MODEL_PATH}" \
   --tensor-parallel-size "${GENERATE_TENSOR_PARALLEL_SIZE:-4}" \
   --gpu-memory-utilization "${GENERATE_GPU_MEMORY_UTILIZATION:-0.85}" \
   --max-model-len "${GENERATE_MAX_MODEL_LEN:-4096}" \
+  --dtype "${GENERATE_DTYPE:-auto}" \
   --max-tokens "${GENERATE_MAX_TOKENS:-512}" \
   --batch-size "${GENERATE_BATCH_SIZE:-5}" \
+  "${VLLM_EXTRA_ARGS[@]}" \
   "${LIMIT_ARGS[@]}"

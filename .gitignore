@@ -13,3 +13,4 @@ __pycache__/
 # Generated retrieval caches
 llm_frag_evaluation/data/inputs/source_collection_*/cache_step2*.json
 AGENTS.md
+llm_frag_evaluation/slurm/model_profiles/*.env

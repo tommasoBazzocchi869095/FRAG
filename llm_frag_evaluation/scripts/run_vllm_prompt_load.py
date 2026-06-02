@@ -25,6 +25,8 @@ def parse_args():
     parser.add_argument("--tensor-parallel-size", type=int, default=4)
     parser.add_argument("--gpu-memory-utilization", type=float, default=0.85)
     parser.add_argument("--max-model-len", type=int, default=4096)
+    parser.add_argument("--dtype", default="auto")
+    parser.add_argument("--max-num-seqs", type=int, default=None)
     parser.add_argument("--max-tokens", type=int, default=512)
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--top-p", type=float, default=1.0)
@@ -176,14 +178,18 @@ def main():
     except ImportError as exc:
         raise SystemExit("vLLM is required. Activate the CINECA vLLM environment before running this script.") from exc
 
-    llm = LLM(
-        model=args.model_path,
-        tensor_parallel_size=args.tensor_parallel_size,
-        gpu_memory_utilization=args.gpu_memory_utilization,
-        max_model_len=args.max_model_len,
-        trust_remote_code=args.trust_remote_code,
-        enforce_eager=args.enforce_eager,
-    )
+    llm_kwargs = {
+        "model": args.model_path,
+        "tensor_parallel_size": args.tensor_parallel_size,
+        "gpu_memory_utilization": args.gpu_memory_utilization,
+        "max_model_len": args.max_model_len,
+        "dtype": args.dtype,
+        "trust_remote_code": args.trust_remote_code,
+        "enforce_eager": args.enforce_eager,
+    }
+    if args.max_num_seqs is not None:
+        llm_kwargs["max_num_seqs"] = args.max_num_seqs
+    llm = LLM(**llm_kwargs)
     tokenizer = llm.get_tokenizer()
     sampling_params = SamplingParams(
         temperature=args.temperature,
@@ -309,6 +315,8 @@ def main():
             "tensor_parallel_size": args.tensor_parallel_size,
             "gpu_memory_utilization": args.gpu_memory_utilization,
             "max_model_len": args.max_model_len,
+            "dtype": args.dtype,
+            "max_num_seqs": args.max_num_seqs,
             "max_tokens": args.max_tokens,
             "temperature": args.temperature,
             "top_p": args.top_p,

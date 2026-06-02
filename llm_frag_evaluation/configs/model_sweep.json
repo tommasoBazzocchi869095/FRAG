@@ -1,0 +1,173 @@
+{
+  "model_root": "/leonardo_work/IscrC_SpecDLM/models",
+  "hardware_assumption": {
+    "cluster": "CINECA",
+    "available_gpus": 16,
+    "gpu_type": "A100 64GB",
+    "notes": "Initial profiles are for smoke tests and first full runs. Confirm with vLLM memory telemetry before filling all 16 GPUs."
+  },
+  "collections": [
+    {
+      "name": "source_collection_pubmed",
+      "config": "llm_frag_evaluation/configs/pubmed_config.json",
+      "initial_max_model_len": 22528
+    },
+    {
+      "name": "source_collection_wiki",
+      "config": "llm_frag_evaluation/configs/wiki_config.json",
+      "initial_max_model_len": 12288
+    }
+  ],
+  "datasets": ["mmlu", "medqa", "pubmedqa", "bioasq"],
+  "retrievers": ["bm25", "contriever"],
+  "experiments": ["zero_shot", "standard_rag", "frag"],
+  "zero_shot_retriever": "bm25",
+  "profiles": {
+    "small_1gpu": {
+      "gpus": 1,
+      "tensor_parallel_size": 1,
+      "time_limit": "08:00:00",
+      "cpus_per_task": 4,
+      "mem": "80G",
+      "dtype": "auto",
+      "gpu_memory_utilization": 0.86,
+      "max_num_seqs": 8,
+      "max_tokens": 1024,
+      "initial_batch_size": 4,
+      "concurrency_with_16_gpus": 16,
+      "notes": "Suitable starting point for 1B-4B models. Run smoke jobs before launching all datasets."
+    },
+    "medium_1gpu": {
+      "gpus": 1,
+      "tensor_parallel_size": 1,
+      "time_limit": "10:00:00",
+      "cpus_per_task": 4,
+      "mem": "120G",
+      "dtype": "auto",
+      "gpu_memory_utilization": 0.88,
+      "max_num_seqs": 4,
+      "max_tokens": 1024,
+      "initial_batch_size": 2,
+      "concurrency_with_16_gpus": 16,
+      "notes": "Suitable starting point for 7B-14B models on A100 64GB if the 22528-token PubMed profile fits."
+    },
+    "large_2gpu": {
+      "gpus": 2,
+      "tensor_parallel_size": 2,
+      "time_limit": "12:00:00",
+      "cpus_per_task": 4,
+      "mem": "180G",
+      "dtype": "auto",
+      "gpu_memory_utilization": 0.90,
+      "max_num_seqs": 2,
+      "max_tokens": 1024,
+      "initial_batch_size": 1,
+      "concurrency_with_16_gpus": 8,
+      "notes": "Conservative starting point for 27B-32B models with long PubMed prompts."
+    }
+  },
+  "models": [
+    {
+      "repo_id": "axiong/PMC_LLaMA_13B",
+      "hf_url": "https://huggingface.co/axiong/PMC_LLaMA_13B",
+      "alias": "PMC_LLaMA_13B",
+      "local_dir": "PMC_LLaMA_13B",
+      "family": "biomedical",
+      "profile": "medium_1gpu",
+      "notes": "Older LLaMA-derived model; verify tokenizer and chat formatting before full runs."
+    },
+    {
+      "repo_id": "aaditya/Llama3-OpenBioLLM-8B",
+      "hf_url": "https://huggingface.co/aaditya/Llama3-OpenBioLLM-8B",
+      "alias": "Llama3-OpenBioLLM-8B",
+      "local_dir": "Llama3-OpenBioLLM-8B",
+      "family": "biomedical",
+      "profile": "medium_1gpu"
+    },
+    {
+      "repo_id": "google/medgemma-4b-it",
+      "hf_url": "https://huggingface.co/google/medgemma-4b-it",
+      "alias": "medgemma-4b-it",
+      "local_dir": "medgemma-4b-it",
+      "family": "biomedical",
+      "profile": "small_1gpu",
+      "notes": "Google gated model; accept license and confirm HF token access before download."
+    },
+    {
+      "repo_id": "Qwen/Qwen2.5-32B-Instruct",
+      "hf_url": "https://huggingface.co/Qwen/Qwen2.5-32B-Instruct",
+      "alias": "Qwen2.5-32B-Instruct",
+      "local_dir": "Qwen2.5-32B-Instruct",
+      "family": "qwen",
+      "profile": "large_2gpu"
+    },
+    {
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "hf_url": "https://huggingface.co/Qwen/Qwen2.5-14B-Instruct",
+      "alias": "Qwen2.5-14B-Instruct",
+      "local_dir": "Qwen2.5-14B-Instruct",
+      "family": "qwen",
+      "profile": "medium_1gpu"
+    },
+    {
+      "repo_id": "Qwen/Qwen2.5-7B-Instruct",
+      "hf_url": "https://huggingface.co/Qwen/Qwen2.5-7B-Instruct",
+      "alias": "Qwen2.5-7B-Instruct",
+      "local_dir": "Qwen2.5-7B-Instruct",
+      "family": "qwen",
+      "profile": "medium_1gpu"
+    },
+    {
+      "repo_id": "Qwen/Qwen2.5-3B-Instruct",
+      "hf_url": "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct",
+      "alias": "Qwen2.5-3B-Instruct",
+      "local_dir": "Qwen2.5-3B-Instruct",
+      "family": "qwen",
+      "profile": "small_1gpu"
+    },
+    {
+      "repo_id": "Qwen/Qwen2.5-1.5B-Instruct",
+      "hf_url": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct",
+      "alias": "Qwen2.5-1.5B-Instruct",
+      "local_dir": "Qwen2.5-1.5B-Instruct",
+      "family": "qwen",
+      "profile": "small_1gpu"
+    },
+    {
+      "repo_id": "meta-llama/Llama-3.1-8B-Instruct",
+      "hf_url": "https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct",
+      "alias": "Llama-3.1-8B-Instruct",
+      "local_dir": "Llama-3.1-8B-Instruct",
+      "family": "llama",
+      "profile": "medium_1gpu",
+      "notes": "Meta gated model; accept license and confirm HF token access before download."
+    },
+    {
+      "repo_id": "meta-llama/Llama-3.2-3B-Instruct",
+      "hf_url": "https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct",
+      "alias": "Llama-3.2-3B-Instruct",
+      "local_dir": "Llama-3.2-3B-Instruct",
+      "family": "llama",
+      "profile": "small_1gpu",
+      "notes": "Meta gated model; accept license and confirm HF token access before download."
+    },
+    {
+      "repo_id": "meta-llama/Llama-3.2-1B-Instruct",
+      "hf_url": "https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct",
+      "alias": "Llama-3.2-1B-Instruct",
+      "local_dir": "Llama-3.2-1B-Instruct",
+      "family": "llama",
+      "profile": "small_1gpu",
+      "notes": "Meta gated model; accept license and confirm HF token access before download."
+    },
+    {
+      "repo_id": "google/medgemma-27b-it",
+      "hf_url": "https://huggingface.co/google/medgemma-27b-it",
+      "alias": "medgemma-27b-it",
+      "local_dir": "medgemma-27b-it",
+      "family": "biomedical",
+      "profile": "large_2gpu",
+      "notes": "Google gated model; accept license and confirm HF token access before download."
+    }
+  ]
+}

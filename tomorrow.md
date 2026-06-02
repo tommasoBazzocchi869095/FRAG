@@ -21,6 +21,8 @@ Current state as of May 28, 2026:
 
 Prepare the next generation campaign across model families and scales. The goal is to reuse the existing PubMed/Wikipedia prompt-load workflow while choosing GPU counts, tensor parallel sizes, context windows, and batch sizes appropriate to each model size.
 
+The canonical model list for the sweep is stored in `llm_frag_evaluation/configs/model_sweep.json`. That file includes the Hugging Face URL, repo ID, local CINECA snapshot directory, model alias, and initial GPU profile for each model.
+
 ### Models To Download Or Verify
 
 General-purpose Llama instruction models:
@@ -49,12 +51,39 @@ Medical and biomedical models:
 
 ```text
 google/medgemma-4b-it
-google/medgemma-27b-text-it
+google/medgemma-27b-it
 aaditya/Llama3-OpenBioLLM-8B
 axiong/PMC_LLaMA_13B
 ```
 
 Confirm exact Hugging Face IDs and access requirements before downloading. Some models may require license acceptance, authentication, or slightly different repository names.
+
+### Model Links And Initial Profiles
+
+| Model | Hugging Face URL | Initial profile |
+|---|---|---|
+| `axiong/PMC_LLaMA_13B` | `https://huggingface.co/axiong/PMC_LLaMA_13B` | `medium_1gpu` |
+| `aaditya/Llama3-OpenBioLLM-8B` | `https://huggingface.co/aaditya/Llama3-OpenBioLLM-8B` | `medium_1gpu` |
+| `google/medgemma-4b-it` | `https://huggingface.co/google/medgemma-4b-it` | `small_1gpu` |
+| `Qwen/Qwen2.5-32B-Instruct` | `https://huggingface.co/Qwen/Qwen2.5-32B-Instruct` | `large_2gpu` |
+| `Qwen/Qwen2.5-14B-Instruct` | `https://huggingface.co/Qwen/Qwen2.5-14B-Instruct` | `medium_1gpu` |
+| `Qwen/Qwen2.5-7B-Instruct` | `https://huggingface.co/Qwen/Qwen2.5-7B-Instruct` | `medium_1gpu` |
+| `Qwen/Qwen2.5-3B-Instruct` | `https://huggingface.co/Qwen/Qwen2.5-3B-Instruct` | `small_1gpu` |
+| `Qwen/Qwen2.5-1.5B-Instruct` | `https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct` | `small_1gpu` |
+| `meta-llama/Llama-3.1-8B-Instruct` | `https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct` | `medium_1gpu` |
+| `meta-llama/Llama-3.2-3B-Instruct` | `https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct` | `small_1gpu` |
+| `meta-llama/Llama-3.2-1B-Instruct` | `https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct` | `small_1gpu` |
+| `google/medgemma-27b-it` | `https://huggingface.co/google/medgemma-27b-it` | `large_2gpu` |
+
+With 16 A100 64GB GPUs, the first scheduling assumption is:
+
+| Profile | GPUs per job | Max concurrent jobs on 16 GPUs | Intended models |
+|---|---:|---:|---|
+| `small_1gpu` | 1 | 16 | 1B-4B models |
+| `medium_1gpu` | 1 | 16 | 7B-14B models if the long PubMed prompt profile fits |
+| `large_2gpu` | 2 | 8 | 27B-32B models with long PubMed prompts |
+
+Do not immediately launch all 16 one-GPU jobs. First run one worst-prompt smoke job per model family and inspect vLLM memory use, prompt errors, and answer-format validity. If the 22528-token PubMed profile fits on one A100 for 7B-14B models, then 16 concurrent one-GPU jobs is a reasonable scheduling target for those models.
 
 ### Download Plan
 
@@ -75,6 +104,95 @@ python -c "from huggingface_hub import snapshot_download; snapshot_download(repo
 ```
 
 Repeat with a stable local folder name for each model.
+
+To print the full set of download commands from the canonical model list:
+
+```bash
+python llm_frag_evaluation/scripts/print_model_download_commands.py
+```
+
+Use `--family qwen`, `--family llama`, `--family biomedical`, or `--alias <model-alias>` to print a smaller batch.
+
+### CINECA Sweep Planning Commands
+
+Use the sweep planner to print the exact profile, prompt-load, smoke-test, and full submission commands:
+
+```bash
+python llm_frag_evaluation/scripts/plan_model_sweep.py --section summary
+python llm_frag_evaluation/scripts/plan_model_sweep.py --family qwen --section profiles
+python llm_frag_evaluation/scripts/plan_model_sweep.py --family qwen --collection source_collection_pubmed --section prompt-loads
+python llm_frag_evaluation/scripts/plan_model_sweep.py --family qwen --collection source_collection_pubmed --section smoke
+python llm_frag_evaluation/scripts/plan_model_sweep.py --family qwen --collection source_collection_pubmed --section submit
+```
+
+Create model-specific env files under `llm_frag_evaluation/slurm/model_profiles/<alias>.env` with:
+
+```bash
+python llm_frag_evaluation/scripts/plan_model_sweep.py --family qwen --collection source_collection_pubmed --write-profiles
+```
+
+On CINECA, pass the real Slurm account if the default placeholder has not been replaced:
+
+```bash
+python llm_frag_evaluation/scripts/plan_model_sweep.py \
+  --family qwen \
+  --collection source_collection_pubmed \
+  --hpc-account iscrc_specdlm \
+  --hpc-qos boost_qos_bprod \
+  --hpc-partition boost_usr_prod \
+  --vllm-venv-activate /leonardo_work/IscrC_SpecDLM/FRAG/.venv_frag_vllm/bin/activate \
+  --write-profiles
+```
+
+These files are ignored by Git because they may contain local CINECA account and environment paths. Submit commands pass the intended profile with `HPC_PRIVATE_ENV=...`. Existing env files are not overwritten unless `--overwrite-profiles` is passed.
+
+Recommended launch order:
+
+1. Download or verify local snapshots for one family, starting with Qwen small models because they are ungated and should exercise the pipeline quickly.
+2. Create prompt loads for that family and one collection.
+3. Run one worst-prompt smoke job for one small, one medium, and one large profile.
+4. Inspect `run_summary.json`, `generation_errors.jsonl`, and Slurm logs for memory, prompt-length, and answer-format issues.
+5. If smoke tests are clean, launch full jobs in waves: up to 16 concurrent `small_1gpu` or `medium_1gpu` jobs, and up to 8 concurrent `large_2gpu` jobs on 16 A100 64GB GPUs.
+
+### Development Plan
+
+Ultimate goal: build a repeatable CINECA workflow that downloads all target models, generates model-specific prompt loads, runs smoke tests, and launches the full FRAG/RAG/zero-shot matrix quickly without overwriting outputs or wasting GPU time.
+
+1. Commit the current sweep setup.
+   How: review the current diff, then commit `model_sweep.json`, planner scripts, Slurm profile support, and this planning document so the baseline is fixed before further changes.
+
+2. Add a profile materialization command.
+   How: use `plan_model_sweep.py --write-profiles` to write `llm_frag_evaluation/slurm/model_profiles/<alias>.env` files directly from `model_sweep.json`; this reduces manual copy errors from printed profile blocks.
+
+3. Add a CINECA dry-run checklist.
+   How: document or generate checks for `HF_TOKEN`, account/QOS/partition, environment activation, model snapshot paths, prompt-load existence, ignored profile env files, and output directories before any `sbatch` command is run.
+
+4. Generate prompt loads per model alias.
+   How: use `plan_model_sweep.py --section prompt-loads` to print model-specific `create_prompt_loads.py` commands. Each model alias writes to its own prompt-load directory, preventing output collisions with the completed Llama 3.1 70B baseline.
+
+5. Download models in controlled batches.
+   How: start with ungated Qwen models using `print_model_download_commands.py --family qwen`, verify local snapshot folders, then handle gated Meta and Google models after license acceptance and token access are confirmed.
+
+6. Run worst-prompt smoke tests.
+   How: use `plan_model_sweep.py --section smoke` to create longest-prompt diagnostic loads and submit one representative smoke job for `small_1gpu`, `medium_1gpu`, and `large_2gpu` profiles.
+
+7. Inspect smoke outputs before full launch.
+   How: check `run_summary.json`, `generation_errors.jsonl`, Slurm `.out/.err` logs, prompt-length failures, invalid answers, GPU memory behavior, and average seconds per prompt; adjust `batch_size`, `max_num_seqs`, `max_model_len`, or GPU count in `model_sweep.json` if needed.
+
+8. Launch full experiments in waves.
+   How: use `plan_model_sweep.py --section submit`, but launch by family/profile instead of all at once. Target up to 16 concurrent `small_1gpu` jobs, up to 16 concurrent `medium_1gpu` jobs after smoke validation, and up to 8 concurrent `large_2gpu` jobs.
+
+9. Add monitoring helpers if needed.
+   How: extend the existing diagnostics to summarize `run_summary.json` files by model, source collection, dataset, retriever, experiment, runtime, prompt errors, invalid answers, and missing predictions.
+
+10. Validate and evaluate predictions.
+    How: reuse `validate_predictions.py` and `evaluate_predictions.py` per completed run. Keep the same missing-prediction policy as the Llama 3.1 70B baseline: missing or invalid predictions are counted as incorrect and documented.
+
+11. Produce model comparison tables.
+    How: add result tables grouped by model family and source collection, with Llama 3.1 70B as the baseline and the same precision, recall, F1, accuracy, and missing-prediction reporting.
+
+12. Finalize the operational recipe.
+    How: update the repo docs with the tested CINECA commands, confirmed profiles, known model-specific quirks, and final concurrency limits after smoke and full-run evidence.
 
 ### Launch Profile Plan
 
