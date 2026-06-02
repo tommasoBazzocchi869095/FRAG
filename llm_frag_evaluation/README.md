@@ -8,6 +8,10 @@ This folder contains a separate line of experiments for evaluating different LLM
 
 `zero_shot` does not use retrieval, so it is generated only once per dataset. By default those prompt loads are stored under the configured primary retriever, `bm25`.
 
+For the current multi-model CINECA sweep, use the dedicated runbook:
+
+- [`CINECA_MODEL_SWEEP_RUNBOOK.md`](CINECA_MODEL_SWEEP_RUNBOOK.md)
+
 The FRAG score is:
 
 ```text
