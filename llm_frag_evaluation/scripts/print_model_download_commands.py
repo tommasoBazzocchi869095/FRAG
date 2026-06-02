@@ -10,7 +10,7 @@ DEFAULT_CONFIG = "llm_frag_evaluation/configs/model_sweep.json"
 def parse_args():
     parser = argparse.ArgumentParser(description="Print CINECA Hugging Face model download commands.")
     parser.add_argument("--config", default=DEFAULT_CONFIG)
-    parser.add_argument("--family", choices=["biomedical", "llama", "qwen"], default=None)
+    parser.add_argument("--family", choices=["biomedical", "llama", "mistral", "qwen"], default=None)
     parser.add_argument("--alias", default=None, help="Print only one model alias.")
     parser.add_argument("--max-workers", type=int, default=2)
     return parser.parse_args()

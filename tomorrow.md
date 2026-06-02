@@ -47,12 +47,19 @@ Qwen/Qwen2.5-32B-Instruct
 Qwen/Qwen2.5-72B-Instruct
 ```
 
+Mistral instruction baseline:
+
+```text
+mistralai/Mistral-7B-Instruct-v0.3
+```
+
 Medical and biomedical models:
 
 ```text
 google/medgemma-4b-it
 google/medgemma-27b-it
 aaditya/Llama3-OpenBioLLM-8B
+BioMistral/BioMistral-7B
 axiong/PMC_LLaMA_13B
 ```
 
@@ -73,6 +80,8 @@ Confirm exact Hugging Face IDs and access requirements before downloading. Some 
 | `meta-llama/Llama-3.1-8B-Instruct` | `https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct` | `medium_1gpu` |
 | `meta-llama/Llama-3.2-3B-Instruct` | `https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct` | `small_1gpu` |
 | `meta-llama/Llama-3.2-1B-Instruct` | `https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct` | `small_1gpu` |
+| `mistralai/Mistral-7B-Instruct-v0.3` | `https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3` | `medium_1gpu` |
+| `BioMistral/BioMistral-7B` | `https://huggingface.co/BioMistral/BioMistral-7B` | `medium_1gpu` |
 | `google/medgemma-27b-it` | `https://huggingface.co/google/medgemma-27b-it` | `large_2gpu` |
 
 With 16 A100 64GB GPUs, the first scheduling assumption is:
@@ -112,6 +121,7 @@ python llm_frag_evaluation/scripts/print_model_download_commands.py
 ```
 
 Use `--family qwen`, `--family llama`, `--family biomedical`, or `--alias <model-alias>` to print a smaller batch.
+Use `--family mistral` for `mistralai/Mistral-7B-Instruct-v0.3`.
 
 ### CINECA Sweep Planning Commands
 

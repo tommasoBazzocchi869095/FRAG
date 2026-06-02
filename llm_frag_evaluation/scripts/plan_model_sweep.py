@@ -14,7 +14,7 @@ SMOKE_SCRIPT = "llm_frag_evaluation/slurm/sh/submit_generate_prompt_load_smoke.s
 def parse_args():
     parser = argparse.ArgumentParser(description="Print CINECA model-sweep setup and submission commands.")
     parser.add_argument("--config", default=DEFAULT_CONFIG)
-    parser.add_argument("--family", choices=["biomedical", "llama", "qwen"], default=None)
+    parser.add_argument("--family", choices=["biomedical", "llama", "mistral", "qwen"], default=None)
     parser.add_argument("--alias", default=None)
     parser.add_argument("--collection", choices=["source_collection_pubmed", "source_collection_wiki"], default=None)
     parser.add_argument(
