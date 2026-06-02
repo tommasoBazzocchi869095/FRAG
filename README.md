@@ -105,7 +105,7 @@ Current Llama 3.1 70B results and the LaTeX-ready table are documented in:
 - [`llm_frag_evaluation/RESULTS_TABLE.md`](llm_frag_evaluation/RESULTS_TABLE.md)
 - [`llm_frag_evaluation/PROMPT_LENGTH_REPORT.md`](llm_frag_evaluation/PROMPT_LENGTH_REPORT.md)
 
-The completed results currently documented there are Wikipedia-resource runs. PubMed-backed prompt loads are longer and require measured context sizing before vLLM generation. The active PubMed campaign uses diagnostics under `llm_frag_evaluation/tests/diagnostics/` to inspect prompt lengths, failed runs, and recommended `GENERATE_MAX_MODEL_LEN` values before full CINECA submission.
+The completed results currently documented there include both Wikipedia-resource and PubMed-resource Llama 3.1 70B runs. PubMed-backed prompt loads are longer than Wikipedia prompt loads; diagnostics under `llm_frag_evaluation/tests/diagnostics/` document prompt lengths, failed runs, and recommended `GENERATE_MAX_MODEL_LEN` values used before full CINECA submission.
 
 ## Quick Start
 
@@ -204,4 +204,4 @@ If you use the MedRAG or MIRAGE components, cite the original work:
 
 This is an active research repository. The most complete and operational workflow currently lives in `llm_frag_evaluation/`; older exploratory training and analysis scripts are preserved for traceability.
 
-As of May 28, 2026, the Wikipedia-resource Llama 3.1 70B campaign is complete and recorded. The PubMed-resource campaign is active and near completion: BioASQ, MedQA, and PubMedQA have recorded metrics, with accepted missing-prediction notes for MedQA BM25 and PubMedQA RAG/FRAG runs. MMLU PubMed generation is the remaining active/pending dataset.
+As of May 28, 2026, the Wikipedia-resource Llama 3.1 70B campaign is complete and recorded. The PubMed-resource campaign is also complete and recorded for MMLU, MedQA, PubMedQA, and BioASQ, with accepted missing-prediction notes for MedQA BM25, MMLU BM25, and PubMedQA RAG/FRAG runs.

@@ -13,10 +13,9 @@ Current state as of May 28, 2026:
 - With `GENERATE_MAX_TOKENS=1024` and a 512-token safety buffer, the measured recommendation for PubMed MedQA Contriever FRAG is `GENERATE_MAX_MODEL_LEN=22528`.
 - A longest-prompt smoke run for PubMed MedQA Contriever FRAG completed 7/7 predictions with `GENERATE_MAX_MODEL_LEN=22528`, `GENERATE_BATCH_SIZE=1`, and `GENERATE_GPU_MEMORY_UTILIZATION=0.90`.
 - The vLLM runner logs individual prompt errors and continues instead of aborting the whole job.
-- The PubMed-resource campaign is mostly complete. BioASQ is complete with metrics recorded. MedQA is complete/accepted with metrics recorded; BM25 RAG has 9 missing predictions and BM25 FRAG has 11 missing predictions due to remaining prompt-length overflows, counted as incorrect. PubMedQA RAG/FRAG is complete/accepted with 1 missing or invalid prediction per run, counted as incorrect.
-- MMLU PubMed runs are the remaining active/pending generation jobs.
+- The PubMed-resource campaign is complete with metrics recorded for MMLU, MedQA, PubMedQA, and BioASQ. MedQA BM25 RAG has 9 missing predictions and BM25 FRAG has 11 missing predictions; MMLU BM25 RAG and BM25 FRAG each have 4 missing predictions; PubMedQA RAG/FRAG has 1 missing or invalid prediction per run. Missing predictions are counted as incorrect.
 - First task tomorrow: prepare the next model sweep before launching new generation. Download/check model snapshots, define HPC launch profiles, and create experiment launch commands for the general-purpose, Qwen, and biomedical models listed below.
-- Then: monitor MMLU PubMed jobs, validate/evaluate them after completion, and fill the final PubMed table averages.
+- Then: use the completed Llama 3.1 70B Wikipedia/PubMed results as the baseline for the next model sweep.
 
 ## First Task Tomorrow: Next Model Sweep
 
@@ -30,7 +29,7 @@ General-purpose Llama instruction models:
 meta-llama/Llama-3.2-1B-Instruct
 meta-llama/Llama-3.2-3B-Instruct
 meta-llama/Llama-3.1-8B-Instruct
-meta-llama/Llama-3.1-70B-Instruct
+meta-llama/Llama-3.1-70B-Instruct - Done for all except the mix evidence retrieval with the 2 collections.
 ```
 
 `Llama-3.1-8B-Instruct` is a useful reference point because it has been used in recent medical RAG work.
@@ -117,7 +116,7 @@ Then run the diagnostic output with the intended profile before launching full j
 |---|---|---|
 | medqa | Complete/accepted; metrics recorded. BM25 RAG has 9 missing predictions and BM25 FRAG has 11 missing predictions. | Add/maintain table values and missing-prediction note |
 | bioasq | Complete; metrics recorded for all five settings | Add/maintain table values |
-| mmlu | Generation active/pending | Monitor jobs, validate predictions, compute metrics, record results |
+| mmlu | Complete; metrics recorded. BM25 RAG and BM25 FRAG each have 4 missing predictions. | Add/maintain table values and missing-prediction note |
 | pubmedqa | RAG/FRAG complete/accepted with 1 missing or invalid prediction per run; metrics recorded. Zero-shot reused from retrieval-independent baseline. | Add/maintain table values and missing-prediction note |
 
 All PubMed prompt loads are under:

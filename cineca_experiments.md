@@ -182,7 +182,7 @@ The all-run diagnostic over `source_collection_pubmed` found 20 prompt loads:
 | `medqa/bm25/zero_shot` | Complete | No rerun needed |
 | MedQA BM25/Contriever RAG/FRAG | Complete/accepted; metrics recorded. BM25 RAG has 9 missing predictions and BM25 FRAG has 11 missing predictions. | Keep missing-prediction note in tables |
 | BioASQ RAG/FRAG | Complete; metrics recorded | No rerun needed |
-| MMLU all prompt loads | Generation active/pending | Monitor, validate, evaluate |
+| MMLU all prompt loads | Complete; metrics recorded. BM25 RAG and BM25 FRAG each have 4 missing predictions. | Keep missing-prediction note in tables |
 | PubMedQA RAG/FRAG | Complete/accepted; metrics recorded with 1 missing or invalid prediction per run | Keep missing-prediction note in tables |
 
 With 16 GPUs available and `GENERATE_GPUS=4`, run at most four jobs concurrently. For large-context jobs, start with `GENERATE_BATCH_SIZE=1`; increase only after a worst-prompt smoke test succeeds.
@@ -233,7 +233,7 @@ Completed:
 | mmlu | contriever | standard_rag | Completed, metrics recorded |
 | mmlu | contriever | frag | Completed, metrics recorded |
 
-No planned CINECA generation jobs remain for the Wikipedia-resource campaign. The PubMed-resource campaign is active and tracked in the PubMed section above.
+No planned CINECA generation jobs remain for the Wikipedia-resource campaign. The PubMed-resource Llama 3.1 70B campaign is also complete and recorded; next planned work is the broader model sweep.
 
 The exact prompt-load path appears in each job's `.out` file. For completed jobs, inspect the corresponding `frag-vllm_<JOBID>.out` log if the prompt-load path is needed later.
 
