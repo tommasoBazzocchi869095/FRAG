@@ -1,0 +1,38 @@
+{
+  "experiment_name": "llm_frag_evaluation_wiki_alpha01",
+  "input_dir": "llm_frag_evaluation/data/inputs",
+  "input_collection": "source_collection_wiki",
+  "input_files": [
+    "source_collection_wiki/cache_step2_bioasq_scored_bm25 (1).json",
+    "source_collection_wiki/cache_step2_bioasq_scored_contriever (1).json",
+    "source_collection_wiki/cache_step2_medqa_scored_bm25.json",
+    "source_collection_wiki/cache_step2_medqa_scored_contriever.json",
+    "source_collection_wiki/cache_step2_mmlu_scored_bm25.json",
+    "source_collection_wiki/cache_step2_mmlu_scored_contriever.json",
+    "source_collection_wiki/cache_step2_pubmedqa_scored_bm25.json",
+    "source_collection_wiki/cache_step2_pubmedqa_scored_contriever.json"
+  ],
+  "output_dir": "llm_frag_evaluation/outputs/predictions/source_collection_wiki_alpha01",
+  "prompt_load_output_dir": "llm_frag_evaluation/outputs/prompt_loads/source_collection_wiki_alpha01",
+  "prompt_file": "llm_frag_evaluation/prompts/default_prompts.json",
+  "experiments": ["zero_shot", "standard_rag", "frag"],
+  "zero_shot_retriever": "bm25",
+  "top_k_context": 32,
+  "frag_alpha": 0.1,
+  "standard_rag_rank": "topicality_score",
+  "output_file_prefix": "test",
+  "system_info": "Offline Factuality",
+  "normalize_topic_scores": true,
+  "llms": [
+    {
+      "name": "local-placeholder",
+      "backend": "dry_run",
+      "model_id": "replace-with-model-id"
+    }
+  ],
+  "generation": {
+    "max_new_tokens": 512,
+    "temperature": 0.0,
+    "top_p": 1.0
+  }
+}
