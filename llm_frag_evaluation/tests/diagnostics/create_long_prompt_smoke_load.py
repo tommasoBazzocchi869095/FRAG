@@ -16,7 +16,7 @@ def parse_args():
         default="llm_frag_evaluation/outputs/prompt_loads/diagnostics",
         help="Root where the diagnostic prompt-load tree is written.",
     )
-    parser.add_argument("--model-alias", default="Meta-Llama-3-70B-Instruct")
+    parser.add_argument("--model-alias", default="model")
     return parser.parse_args()
 
 
