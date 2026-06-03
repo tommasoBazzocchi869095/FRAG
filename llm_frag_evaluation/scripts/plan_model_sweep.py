@@ -16,7 +16,7 @@ def parse_args():
     parser.add_argument("--config", default=DEFAULT_CONFIG)
     parser.add_argument("--family", choices=["biomedical", "llama", "mistral", "qwen"], default=None)
     parser.add_argument("--alias", default=None)
-    parser.add_argument("--collection", choices=["source_collection_pubmed", "source_collection_wiki"], default=None)
+    parser.add_argument("--collection", default=None)
     parser.add_argument(
         "--section",
         choices=["summary", "profiles", "prompt-loads", "smoke", "submit", "all"],
@@ -50,6 +50,9 @@ def select_collections(config, args):
     collections = config["collections"]
     if args.collection:
         collections = [collection for collection in collections if collection["name"] == args.collection]
+        if not collections:
+            available = ", ".join(collection["name"] for collection in config["collections"])
+            raise SystemExit(f"Unknown collection {args.collection!r}. Available collections: {available}")
     return collections
 
 
