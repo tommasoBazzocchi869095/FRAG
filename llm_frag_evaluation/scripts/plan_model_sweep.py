@@ -108,7 +108,7 @@ def print_summary(config, models, collections):
 
 
 def profile_lines(config, model, collections, args):
-    max_model_len = max(collection["initial_max_model_len"] for collection in collections)
+    max_model_len = model.get("max_model_len", max(collection["initial_max_model_len"] for collection in collections))
     profile = config["profiles"][model["profile"]]
     return [
         'export ENV_INIT_COMMAND="${ENV_INIT_COMMAND:-module purge; module load python/3.11.7}"',
@@ -170,17 +170,31 @@ def print_prompt_loads(models, collections):
             )
 
 
-def print_smoke(config, models, profile_dir):
-    source = (
-        "llm_frag_evaluation/outputs/prompt_loads/source_collection_pubmed/medqa/contriever/frag/"
-        "Meta-Llama-3-70B-Instruct/prompts.jsonl"
+def smoke_source_prompt(collection_name, alias):
+    if collection_name == "source_collection_wiki":
+        experiment = "standard_rag"
+    else:
+        experiment = "frag"
+    return (
+        PurePosixPath("llm_frag_evaluation/outputs/prompt_loads")
+        / collection_name
+        / "medqa"
+        / "contriever"
+        / experiment
+        / alias
+        / "prompts.jsonl"
     )
+
+
+def print_smoke(config, models, collections):
+    collection_name = collections[0]["name"] if collections else "source_collection_wiki"
     for model in models:
-        run_name = f"{model['alias']}_pubmed_medqa_longest"
+        run_name = f"{model['alias']}_{collection_name}_medqa_longest"
+        source = smoke_source_prompt(collection_name, model["alias"])
         smoke_prompt = (
             PurePosixPath("llm_frag_evaluation/outputs/prompt_loads/diagnostics")
             / run_name
-            / "Meta-Llama-3-70B-Instruct"
+            / model["alias"]
             / "prompts.jsonl"
         )
         print(
@@ -221,7 +235,7 @@ def main():
         elif section == "prompt-loads":
             print_prompt_loads(models, collections)
         elif section == "smoke":
-            print_smoke(config, models, args.profile_dir)
+            print_smoke(config, models, collections)
         elif section == "submit":
             print_submit(config, models, collections, args.profile_dir)
 

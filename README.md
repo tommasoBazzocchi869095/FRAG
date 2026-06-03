@@ -59,7 +59,7 @@ The default FRAG ranking score used by the evaluation package is:
 final_score = alpha * normalized_topicality + (1 - alpha) * factuality
 ```
 
-with `alpha = 0.6`, weighting topical relevance at 60 percent and factuality at 40 percent. Topicality is query-dependent and produced by the retriever; factuality is a precomputed document/passage property. The ranking mechanism directly considers both scores during retrieval-phase reranking, before the final top-k context is passed to the generator.
+with `alpha = 0.6` by default, weighting topical relevance at 60 percent and factuality at 40 percent. Topicality is query-dependent and produced by the retriever; factuality is a precomputed document/passage property. The ranking mechanism directly considers both scores during retrieval-phase reranking, before the final top-k context is passed to the generator.
 
 ## What This Repository Contains
 

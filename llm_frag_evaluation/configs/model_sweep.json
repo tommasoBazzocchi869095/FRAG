@@ -51,6 +51,20 @@
       "concurrency_with_16_gpus": 16,
       "notes": "Suitable starting point for 7B-14B models on A100 64GB if the 22528-token PubMed profile fits."
     },
+    "medium_1gpu_longcontext": {
+      "gpus": 1,
+      "tensor_parallel_size": 1,
+      "time_limit": "12:00:00",
+      "cpus_per_task": 4,
+      "mem": "120G",
+      "dtype": "auto",
+      "gpu_memory_utilization": 0.92,
+      "max_num_seqs": 2,
+      "max_tokens": 1024,
+      "initial_batch_size": 2,
+      "concurrency_with_16_gpus": 16,
+      "notes": "Long-context profile for Llama-3.1-8B-Instruct. Use for prompt loads up to roughly 50k tokens."
+    },
     "large_2gpu": {
       "gpus": 2,
       "tensor_parallel_size": 2,
@@ -148,8 +162,9 @@
       "alias": "Llama-3.1-8B-Instruct",
       "local_dir": "Llama-3.1-8B-Instruct",
       "family": "llama",
-      "profile": "medium_1gpu",
-      "notes": "Meta gated model; accept license and confirm HF token access before download."
+      "profile": "medium_1gpu_longcontext",
+      "max_model_len": 53248,
+      "notes": "Meta gated model; accept license and confirm HF token access before download. Use the long-context profile for the Wikipedia sweep and any prompt loads up to roughly 50k tokens."
     },
     {
       "repo_id": "mistralai/Mistral-7B-Instruct-v0.3",
