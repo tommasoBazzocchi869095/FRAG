@@ -13,9 +13,19 @@
       "initial_max_model_len": 22528
     },
     {
+      "name": "source_collection_pubmed_alpha02",
+      "config": "llm_frag_evaluation/configs/pubmed_config_alpha02.json",
+      "initial_max_model_len": 53248
+    },
+    {
       "name": "source_collection_wiki",
       "config": "llm_frag_evaluation/configs/wiki_config.json",
       "initial_max_model_len": 12288
+    },
+    {
+      "name": "source_collection_wiki_alpha02",
+      "config": "llm_frag_evaluation/configs/wiki_config_alpha02.json",
+      "initial_max_model_len": 53248
     }
   ],
   "datasets": ["mmlu", "medqa", "pubmedqa", "bioasq"],
