@@ -199,7 +199,7 @@ def print_smoke(config, models, collections):
         )
         print(
             "python llm_frag_evaluation/tests/diagnostics/create_long_prompt_smoke_load.py "
-            f"--prompt-load {quote(source)} "
+            f"--prompt-load {quote(str(source))} "
             f"--model-path {quote(model_path(config, model))} "
             f"--run-name {quote(run_name)} "
             "--top-longest 5 --include-first 2"
