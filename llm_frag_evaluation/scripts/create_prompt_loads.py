@@ -16,7 +16,7 @@ from llm_frag_evaluation.src.experiments import prepare_experiment_item
 from llm_frag_evaluation.src.prompts import load_prompt_templates
 
 
-DEFAULT_MODEL = "meta-llama/Meta-Llama-3-70B-Instruct"
+DEFAULT_MODEL = "meta-llama/Llama-3.1-8B-Instruct"
 
 
 def parse_args():
@@ -27,7 +27,7 @@ def parse_args():
     parser.add_argument("--input-collection", default=None, help="Optional subdirectory under input_dir, for example source_collection_pubmed.")
     parser.add_argument("--experiment", choices=["zero_shot", "standard_rag", "frag"], default=None)
     parser.add_argument("--model", default=DEFAULT_MODEL)
-    parser.add_argument("--model-alias", default="Meta-Llama-3-70B-Instruct")
+    parser.add_argument("--model-alias", default="Llama-3.1-8B-Instruct")
     parser.add_argument("--output-dir", default=None)
     return parser.parse_args()
 

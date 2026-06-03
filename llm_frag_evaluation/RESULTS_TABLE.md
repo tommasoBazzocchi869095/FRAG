@@ -444,6 +444,287 @@ Contriever FRAG
 \end{table*}
 ```
 
+## Wikipedia-Resource Results for Llama-3.1-8B-Instruct
+
+Current filled result:
+
+- MMLU / BM25 / zero_shot / Llama-3.1-8B-Instruct
+- `n = 1089`
+- `missing_predictions = 0`
+- Accuracy: `0.721763085399449`
+- Precision macro: `0.7227123366829249`
+- Recall macro: `0.7237161236955453`
+- F1 macro: `0.7183467030296345`
+- MedQA / BM25 / zero_shot / Llama-3.1-8B-Instruct
+- `n = 1273`
+- `missing_predictions = 0`
+- Accuracy: `0.617439120188531`
+- Precision macro: `0.617439120188531`
+- Recall macro: `0.614751265302379`
+- F1 macro: `0.6138788955498394`
+- PubMedQA / BM25 / zero_shot / Llama-3.1-8B-Instruct
+- `n = 500`
+- `missing_predictions = 3`
+- Accuracy: `0.584`
+- Precision macro: `0.33687707641196013`
+- Recall macro: `0.30082150291180393`
+- F1 macro: `0.28881852010877346`
+- BioASQ / BM25 / zero_shot / Llama-3.1-8B-Instruct
+- `n = 618`
+- `missing_predictions = 3`
+- Accuracy: `0.7928802588996764`
+- Precision macro: `0.5234358131114322`
+- Recall macro: `0.5059279862254261`
+- F1 macro: `0.5125709651257097`
+- MMLU / BM25 / standard_rag / Llama-3.1-8B-Instruct
+- `n = 1089`
+- `missing_predictions = 1`
+- Accuracy: `0.7566574839302111`
+- Precision macro: `0.6066317512425252`
+- Recall macro: `0.6052317693223394`
+- F1 macro: `0.6016342791363325`
+- MMLU / BM25 / frag / Llama-3.1-8B-Instruct
+- `n = 1089`
+- `missing_predictions = 1`
+- Accuracy: `0.7483930211202938`
+- Precision macro: `0.601047311369552`
+- Recall macro: `0.598675489909007`
+- F1 macro: `0.5952600291425227`
+- MMLU / Contriever / standard_rag / Llama-3.1-8B-Instruct
+- `n = 1089`
+- `missing_predictions = 0`
+- Accuracy: `0.7493112947658402`
+- Precision macro: `0.7506650401479438`
+- Recall macro: `0.7489117143732353`
+- F1 macro: `0.7448716948861631`
+- MMLU / Contriever / frag / Llama-3.1-8B-Instruct
+- `n = 1089`
+- `missing_predictions = 0`
+- Accuracy: `0.7539026629935721`
+- Precision macro: `0.755552534408672`
+- Recall macro: `0.7534597528334321`
+- F1 macro: `0.7495433307192604`
+- MedQA / BM25 / standard_rag / Llama-3.1-8B-Instruct
+- `n = 1273`
+- `missing_predictions = 0`
+- Accuracy: `0.622152395915161`
+- Precision macro: `0.6306727710249119`
+- Recall macro: `0.6165786536454645`
+- F1 macro: `0.6176089841970768`
+- MedQA / BM25 / frag / Llama-3.1-8B-Instruct
+- `n = 1273`
+- `missing_predictions = 0`
+- Accuracy: `0.6158680282796544`
+- Precision macro: `0.6227535325857245`
+- Recall macro: `0.6102457094617042`
+- F1 macro: `0.610598993447071`
+- MedQA / Contriever / standard_rag / Llama-3.1-8B-Instruct
+- `n = 1273`
+- `missing_predictions = 0`
+- Accuracy: `0.631578947368421`
+- Precision macro: `0.6392827100213068`
+- Recall macro: `0.6251049629683385`
+- F1 macro: `0.6261408821868306`
+- MedQA / Contriever / frag / Llama-3.1-8B-Instruct
+- `n = 1273`
+- `missing_predictions = 0`
+- Accuracy: `0.6213668499607227`
+- Precision macro: `0.627217784262969`
+- Recall macro: `0.6146314586895375`
+- F1 macro: `0.6153094312393159`
+- PubMedQA / BM25 / standard_rag / Llama-3.1-8B-Instruct
+- `n = 500`
+- `missing_predictions = 1`
+- Accuracy: `0.504`
+- Precision macro: `0.24787356094473237`
+- Recall macro: `0.26496441128548154`
+- F1 macro: `0.255350144653959`
+- PubMedQA / BM25 / frag / Llama-3.1-8B-Instruct
+- `n = 500`
+- `missing_predictions = 1`
+- Accuracy: `0.508`
+- Precision macro: `0.24768031858979545`
+- Recall macro: `0.2650555269702427`
+- F1 macro: `0.2546290549486925`
+- PubMedQA / Contriever / standard_rag / Llama-3.1-8B-Instruct
+- `n = 500`
+- `missing_predictions = 0`
+- Accuracy: `0.544`
+- Precision macro: `0.391103687978688`
+- Recall macro: `0.395557452580864`
+- F1 macro: `0.38938047232882883`
+- PubMedQA / Contriever / frag / Llama-3.1-8B-Instruct
+- `n = 500`
+- `missing_predictions = 0`
+- Accuracy: `0.538`
+- Precision macro: `0.3974474892196411`
+- Recall macro: `0.39678714076707383`
+- F1 macro: `0.3930326294784126`
+- BioASQ / BM25 / standard_rag / Llama-3.1-8B-Instruct
+- `n = 618`
+- `missing_predictions = 4`
+- Accuracy: `0.7588996763754046`
+- Precision macro: `0.4985812742736524`
+- Recall macro: `0.5044786285973776`
+- F1 macro: `0.4996749408983452`
+- BioASQ / BM25 / frag / Llama-3.1-8B-Instruct
+- `n = 618`
+- `missing_predictions = 2`
+- Accuracy: `0.7637540453074434`
+- Precision macro: `0.5009604440662508`
+- Recall macro: `0.5096138199844846`
+- F1 macro: `0.5028388459761008`
+- BioASQ / Contriever / standard_rag / Llama-3.1-8B-Instruct
+- `n = 618`
+- `missing_predictions = 0`
+- Accuracy: `0.7896440129449838`
+- Precision macro: `0.7799166710616529`
+- Recall macro: `0.801271499120168`
+- F1 macro: `0.7825004060858736`
+- BioASQ / Contriever / frag / Llama-3.1-8B-Instruct
+- `n = 618`
+- `missing_predictions = 2`
+- Accuracy: `0.7928802588996764`
+- Precision macro: `0.5238034569159553`
+- Recall macro: `0.5365196495808973`
+- F1 macro: `0.5247678677332753`
+
+Values in the LaTeX table are reported as percentages.
+
+```latex
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lcccccccccccccccccccc}
+\toprule
+& \multicolumn{4}{c}{MMLU}
+& \multicolumn{4}{c}{MedQA}
+& \multicolumn{4}{c}{PubMedQA}
+& \multicolumn{4}{c}{BioASQ}
+& \multicolumn{4}{c}{Average} \\
+\cmidrule(lr){2-5}
+\cmidrule(lr){6-9}
+\cmidrule(lr){10-13}
+\cmidrule(lr){14-17}
+\cmidrule(lr){18-21}
+\textbf{Llama-3.1-8B-Instruct}
+& P & R & F1 & Acc
+& P & R & F1 & Acc
+& P & R & F1 & Acc
+& P & R & F1 & Acc
+& P & R & F1 & Acc \\
+\midrule
+Zero-shot
+& 72.18 & 72.27 & 72.37 & 71.83
+& 61.74 & 61.48 & 61.39 & 61.33
+& 58.40 & 33.69 & 30.08 & 28.88
+& 79.29 & 52.34 & 50.59 & 51.26
+& 67.90 & 54.94 & 53.61 & 53.33 \\
+
+BM25 RAG
+& 75.67 & 60.66 & 60.52 & 60.16
+& 62.22 & 63.07 & 61.66 & 61.76
+& 50.40 & 24.79 & 26.50 & 25.54
+& 75.89 & 49.86 & 50.45 & 49.97
+& 66.04 & 49.59 & 49.78 & 49.36 \\
+
+BM25 FRAG
+& 74.84 & 60.10 & 59.87 & 59.53
+& 61.59 & 62.28 & 61.02 & 61.06
+& 50.80 & 24.77 & 26.51 & 25.46
+& 76.38 & 50.10 & 50.96 & 50.28
+& 65.90 & 49.31 & 49.59 & 49.08 \\
+
+Contriever RAG
+& 75.39 & 75.56 & 75.35 & 74.95
+& 63.16 & 63.93 & 62.51 & 62.61
+& 53.80 & 39.11 & 39.56 & 38.94
+& 78.96 & 77.99 & 80.13 & 78.25
+& 67.83 & 64.15 & 64.38 & 63.69 \\
+
+Contriever FRAG
+& 75.39 & 75.56 & 75.35 & 74.95
+& 62.14 & 62.72 & 61.46 & 61.53
+& 53.80 & 39.74 & 39.68 & 39.30
+& 79.29 & 52.38 & 53.65 & 52.48
+& 67.65 & 57.60 & 57.53 & 57.07 \\
+\bottomrule
+\end{tabular}
+\caption{Evaluation results for Llama-3.1-8B-Instruct on the MIRAGE medical question answering benchmarks. We report macro precision (P), macro recall (R), macro F1 (F1), and accuracy (Acc) for zero-shot prompting, standard retrieval-augmented generation (RAG), and factuality-aware retrieval-augmented generation (FRAG). RAG and FRAG are evaluated with BM25 and Contriever retrieval over Wikipedia passages. The Average columns report the arithmetic mean across MMLU, MedQA, PubMedQA, and BioASQ. Missing predictions are counted as incorrect.}
+\label{tab:llama31_8b_frag_results}
+\end{table*}
+```
+
+## Wikipedia-Resource Results for Llama-3.1-8B-Instruct, Alpha 0.1
+
+This final run uses `frag_alpha = 0.1`, meaning 10 percent topicality and 90 percent factuality. The `bioasq/bm25/frag` run failed completely and produced only missing predictions, so it should be treated as a hard failure rather than a meaningful metric point.
+
+```latex
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lcccccccccccccccccccc}
+\toprule
+& \multicolumn{4}{c}{MMLU}
+& \multicolumn{4}{c}{MedQA}
+& \multicolumn{4}{c}{PubMedQA}
+& \multicolumn{4}{c}{BioASQ}
+& \multicolumn{4}{c}{Average} \\
+\cmidrule(lr){2-5}
+\cmidrule(lr){6-9}
+\cmidrule(lr){10-13}
+\cmidrule(lr){14-17}
+\cmidrule(lr){18-21}
+\textbf{Llama-3.1-8B-Instruct}
+& P & R & F1 & Acc
+& P & R & F1 & Acc
+& P & R & F1 & Acc
+& P & R & F1 & Acc
+& P & R & F1 & Acc \\
+\midrule
+Zero-shot
+& 72.18 & 72.27 & 71.83 & 72.18
+& 61.74 & 61.48 & 61.39 & 61.74
+& 33.69 & 30.08 & 28.88 & 58.40
+& 52.34 & 50.59 & 51.26 & 79.29
+& 55.01 & 53.63 & 53.34 & 67.90 \\
+
+BM25 RAG
+& 75.67 & 60.66 & 60.52 & 60.16
+& 62.22 & 63.07 & 61.66 & 61.76
+& 24.79 & 26.50 & 25.54 & 25.54
+& 49.86 & 50.45 & 49.97 & 75.89
+& 49.38 & 50.13 & 49.33 & 55.84 \\
+
+BM25 FRAG
+& 74.84 & 60.10 & 59.87 & 59.53
+& 61.59 & 62.28 & 61.02 & 61.06
+& 0.00 & 0.00 & 0.00 & 0.00
+& 50.10 & 50.96 & 50.28 & 76.38
+& 49.14 & 49.90 & 49.07 & 49.24 \\
+
+Contriever RAG
+& 75.39 & 75.56 & 75.35 & 74.95
+& 63.16 & 63.93 & 62.51 & 62.61
+& 39.11 & 39.56 & 38.94 & 38.94
+& 77.99 & 80.13 & 78.25 & 78.96
+& 63.95 & 64.38 & 63.69 & 63.87 \\
+
+Contriever FRAG
+& 75.39 & 75.56 & 75.35 & 74.95
+& 62.14 & 62.72 & 61.46 & 61.53
+& 39.74 & 39.68 & 39.30 & 39.30
+& 52.38 & 53.65 & 52.48 & 79.29
+& 57.45 & 57.53 & 57.07 & 63.77 \\
+\bottomrule
+\end{tabular}
+\caption{Evaluation results for Llama-3.1-8B-Instruct on the MIRAGE medical question answering benchmarks with `frag_alpha = 0.1`. We report macro precision (P), macro recall (R), macro F1 (F1), and accuracy (Acc) for zero-shot prompting, standard retrieval-augmented generation (RAG), and factuality-aware retrieval-augmented generation (FRAG). RAG and FRAG are evaluated with BM25 and Contriever retrieval over Wikipedia passages. The Average columns report the arithmetic mean across MMLU, MedQA, PubMedQA, and BioASQ. Missing predictions are counted as incorrect. The BM25 FRAG BioASQ run failed completely and is shown as zeros.}
+\label{tab:llama31_8b_frag_alpha01_results}
+\end{table*}
+```
+
 ## Metric Mapping
 
 For each completed experiment, fill columns in this order:

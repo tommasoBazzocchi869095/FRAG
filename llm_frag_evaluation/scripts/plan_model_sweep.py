@@ -190,25 +190,28 @@ def smoke_source_prompt(collection_name, alias):
 
 
 def print_smoke(config, models, collections):
-    collection_name = collections[0]["name"] if collections else "source_collection_wiki"
+    if not collections:
+        collections = [{"name": "source_collection_wiki"}]
     for model in models:
-        run_name = f"{model['alias']}_{collection_name}_medqa_longest"
-        source = smoke_source_prompt(collection_name, model["alias"])
-        smoke_prompt = (
-            PurePosixPath("llm_frag_evaluation/outputs/prompt_loads/diagnostics")
-            / run_name
-            / model["alias"]
-            / "prompts.jsonl"
-        )
-        print(
-            "python llm_frag_evaluation/tests/diagnostics/create_long_prompt_smoke_load.py "
-            f"--prompt-load {quote(str(source))} "
-            f"--model-path {quote(model_path(config, model))} "
-            f"--run-name {quote(run_name)} "
-            f"--model-alias {quote(model['alias'])} "
-            "--top-longest 5 --include-first 2"
-        )
-        print(f"bash {SMOKE_SCRIPT} --model-alias {quote(model['alias'])} {quote(str(smoke_prompt))}")
+        for collection in collections:
+            collection_name = collection["name"]
+            run_name = f"{model['alias']}_{collection_name}_medqa_longest"
+            source = smoke_source_prompt(collection_name, model["alias"])
+            smoke_prompt = (
+                PurePosixPath("llm_frag_evaluation/outputs/prompt_loads/diagnostics")
+                / run_name
+                / model["alias"]
+                / "prompts.jsonl"
+            )
+            print(
+                "python llm_frag_evaluation/tests/diagnostics/create_long_prompt_smoke_load.py "
+                f"--prompt-load {quote(str(source))} "
+                f"--model-path {quote(model_path(config, model))} "
+                f"--run-name {quote(run_name)} "
+                f"--model-alias {quote(model['alias'])} "
+                "--top-longest 5 --include-first 2"
+            )
+            print(f"bash {SMOKE_SCRIPT} --model-alias {quote(model['alias'])} {quote(str(smoke_prompt))}")
         print()
 
 
