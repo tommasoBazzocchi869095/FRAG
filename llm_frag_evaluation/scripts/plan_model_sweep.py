@@ -205,6 +205,7 @@ def print_smoke(config, models, collections):
             f"--prompt-load {quote(str(source))} "
             f"--model-path {quote(model_path(config, model))} "
             f"--run-name {quote(run_name)} "
+            f"--model-alias {quote(model['alias'])} "
             "--top-longest 5 --include-first 2"
         )
         print(f"bash {SMOKE_SCRIPT} --model-alias {quote(model['alias'])} {quote(str(smoke_prompt))}")
