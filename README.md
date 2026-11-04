@@ -185,6 +185,10 @@ Some MedRAG workflows may also require CUDA-compatible PyTorch, Java for BM25/Py
 FRAG is research code for evaluating retrieval and generation strategies. It is not a clinical decision-support system and should not be used to provide medical advice. Model outputs require expert review, especially when used with biomedical or clinical content.
 
 ## Acknowledgements
+We acknowledge the CINECA award under the ISCRA initiative, for the availability of highperformance computing resources and support. This paper was supported by the National Plan for
+NRRP Complementary Investments (PNC, established with the decree-law 6 May 2021, n. 59, converted by law n. 101 of 2021) in the call for the funding of research initiatives for technologies and
+innovative trajectories in the health and care sectors (Directorial Decree n. 931 of 06-06-2022) - project n. PNC0000003 - AdvaNced Technologies for Human-centrEd Medicine (project acronym: ANTHEM).
+This work reflects only the authors’ views and opinions, neither the Ministry for University and Research nor the European Commission can be considered responsible for them.
 
 This repository builds on the MedRAG toolkit and MIRAGE benchmark:
 
